@@ -81,9 +81,9 @@ echo %line%
 echo Source  : "%CTRsource%"
 echo %line%
 echo.
-if "%CTRsource:~-1%"=="\" set "CTRsource=%CTRsource:~0,-1%"
 cd /d "%CTRsource%"
-dir /b /s /adr . 1>nul 2>nul && (
+if "%CTRsource:~-1%"=="\" set "CTRsource=%CTRsource:~0,-1%"
+dir /b /s /adr Office\ 1>nul 2>nul && (
 set CTRtype=DVD
 ) || (
 set CTRtype=Local
