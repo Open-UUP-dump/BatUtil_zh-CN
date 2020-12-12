@@ -117,6 +117,11 @@ specify custom "folder" path for microsoft-windows-netfx3-ondemand-package.cab
 convert install.wim to install.esd, if the target is a distribution  
 warning: the process will consume very high amount of CPU and RAM resources
 
+# wim2swm
+split install.wim into multiple install.swm files, if the target is a distribution
+
+note: if both wim2esd/wim2swm are 1, install.esd takes precedence over split install.swm
+
 * ISO  
 create new iso file, if the target is a distribution folder  
 require Win10 ADK, or place oscdimg.exe or cdimage.exe next to the script
@@ -153,6 +158,13 @@ start the process automatically once you execute the script
 [WHDownloader](https://forums.mydigitallife.net/threads/44645)
 
 ## Changelog:
+
+9.0:  
+- Improved detection for update KB number and version
+- Added detection support for WindowsExperienceFeaturePack updates (e.g. KB4592784)  
+- Added wim2swm option to split install.wim into multiple install.swm files  
+note: if both wim2esd/wim2swm are 1, install.esd takes precedence over split install.swm
+- Added internal support to work with W10MUI.cmd (multilingual distribution script)
 
 8.9:  
 - Improved processing for 20H2 Enablement/EdgeChromium package  
