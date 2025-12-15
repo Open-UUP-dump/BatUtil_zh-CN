@@ -12,11 +12,11 @@ WHOAMI /Groups | FINDSTR /I /C:"S-1-16-16384" /C:"S-1-16-12288" >NUL || (
 )
 
 
-SET "dirOfEXE=W:\Data\WU\Updates\Office2010-x86"
+SET "dirOfEXE=D:\WHDownloader\Updates\Office2010-x64"
 SET "dirOfMSP=%~dp0MSPs"
 SET "OldMSPdir=!dirOfMSP!\OLD"
 SET "langOfMSP=en-us"
-SET "ProofLang=es-es,fr-fr"
+SET "ProofLang=fr-fr,es-es"
 
 
 :EvalOpt
@@ -42,9 +42,10 @@ FOR %%A in ( "h|Help" "e|dirOfEXE" "m|dirOfMSP" "o|OldMSPdir" "l|langOfMSP" "p|P
                    ECHO(
                    ECHO(Proofing package has additional companion languages.
                    ECHO(To find out which you need, check out the link below which fit with your office version.
-                   ECHO( Office 2010:                 "technet.microsoft.com/en-us/library/ee942198(v=office.14).aspx"
-                   ECHO( Office 2013/365 ProPlus:  "technet.microsoft.com/en-us/library/ee942198(v=office.15).aspx"
-                   ECHO( Office 2016:                 Not needed, all packages are language neutral or automatically chosen.
+                   ECHO( Office 2007:   "technet.microsoft.com/en-us/library/cc179042(v=office.12).aspx"
+                   ECHO( Office 2010:   "technet.microsoft.com/en-us/library/ee942198(v=office.14).aspx"
+                   ECHO( Office 2013:   "technet.microsoft.com/en-us/library/ee942198(v=office.15).aspx"
+                   ECHO( Office 2016:   Not needed, all packages are language neutral or automatically chosen.
                    PAUSE
                    EXIT /B
            ) else (
@@ -108,12 +109,13 @@ IF defined ERREXE IF defined ERRCAB (
        ECHO(Extracting "!fileOfEXE!.cab"
        mkdir "!dirOfMSP!\!fileOfEXE!" 2>NUL
        expand.exe -r -f:*.msp "!fileOfEXE!.cab" "!dirOfMSP!\!fileOfEXE!" >NUL
-       IF not exist "!dirOfMSP!\!fileOfEXE!\*.msp" (
+       IF not exist "!dirOfMSP!\!fileOfEXE!\*" (
            SET "ercFailEXE=!ERRORLEVEL!"
            SET /a "cntFailEXE+=1"
            SET "excFailEXE!cntFailEXE!=%%~fA"
            SET "ercFailEXE!cntFailEXE!=!ercFailEXE!"
-           ECHO(ERROR: No folder was made after extracting "!fileOfEXE!.cab"^^!
+           ECHO(ERROR: No files detected after extracting "!fileOfEXE!.cab"^^!
+           RD /s /q "!dirOfMSP!\!fileOfEXE!\" 2>NUL
        ) else (
            CALL :doMSP
        )
@@ -150,6 +152,10 @@ EXIT /b
 :doMSP
            PUSHD "!dirOfMSP!\!fileOfEXE!\"
            ECHO(=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+           IF not exist "*.msp" (
+               ECHO( ^<= Oh my, It appears no MSP files were found, skipping =^>
+               GOTO :noMSP
+           )
            FOR /r %%B in ("*.msp") do (
                SET "fileOfMSP=%%~nB"
                FOR /f "delims=-" %%C in ( "!fileOfMSP!" ) do (
@@ -165,9 +171,14 @@ EXIT /b
                        ) ELSE (
                            IF "!ProofLang!"=="" (
                                IF /I "!nameOfMSP!"=="proof" ( SET "TRUE=1" )
+                               ECHO !nameOfMSP! | FINDSTR /I "proofsp" >NUL && ( SET "TRUE=1" )
                            )
                            IF not "!ProofLang!"=="" FOR %%D in ( !ProofLang! ) do (
                                IF /I "!fileOfMSP!"=="proof-%%D" ( SET "TRUE=1" )
+                               IF /I "!fileOfMSP!"=="proofsp-%%D" ( SET "TRUE=1" )
+                               IF /I "!fileOfMSP!"=="proofsp1-%%D" ( SET "TRUE=1" )
+                               IF /I "!fileOfMSP!"=="proofsp2-%%D" ( SET "TRUE=1" )
+                               IF /I "!fileOfMSP!"=="proofsp3-%%D" ( SET "TRUE=1" )
                            )
                            IF not "!langOfMSP!"=="" FOR %%D in ( !langOfMSP! ) do (
                                IF /I "!fileOfMSP!"=="!nameOfMSP!-%%D" ( SET "TRUE=1" )
@@ -183,6 +194,9 @@ EXIT /b
                        SET "_I=Y"
                        ECHO !fileOfMSP! | FINDSTR /I /V "x-none" | FINDSTR /I /R ".*-.*-.*" >NUL && (
                            SET "_I=Z"
+                       )
+                       ECHO !nameOfEXE! | FINDSTR /I /V "usp10" | FINDSTR /I "sp1 sp2 sp3 sp20" >NUL && (
+                           SET "_I=A"
                        )
                        SET "NewMSPpath=!_I!_!nameOfEXE!_!kbOfEXE!_!archOfEXE!_!fileOfMSP!.msp"
                        ECHO(Moving "!fileOfMSP!.msp" to "!NewMSPpath!"
@@ -207,6 +221,7 @@ EXIT /b
            ) else (
                ECHO( ^<= Oh my, It appears none of the MSP files were applicable to your given languages =^>
            )
+:noMSP
            ECHO(=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
            POPD
            rem. ECHO(Removing folder "!dirOfMSP!\!fileOfEXE!\"
