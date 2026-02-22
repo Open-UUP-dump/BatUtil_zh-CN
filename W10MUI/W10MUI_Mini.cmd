@@ -1,5 +1,5 @@
 @setlocal DisableDelayedExpansion
-@set uiv=v25.0
+@set uiv=v25.1
 @echo off
 
 set WIMPATH=
@@ -251,14 +251,15 @@ for /f "skip=2 tokens=1* delims==" %%A in ('find /i "repo " ".\Updates\W10UI.ini
 )
 
 for /L %%j in (1,1,%LANGUAGES%) do (
-"!_7z!" e ".\langs\!LPFILE%%j!" -o"!EXTRACTDIR!" langcfg.ini %_Null%
-for /f "tokens=2 delims==" %%i in ('type "!EXTRACTDIR!\langcfg.ini" ^| findstr /i "Language"') do set "LANGUAGE%%j=%%i"
-del /f /q "!EXTRACTDIR!\langcfg.ini"
 "!_7z!" e ".\langs\!LPFILE%%j!" -o"!EXTRACTDIR!" Microsoft-Windows-Common-Foundation-Package*~10.*.mum %_Null%
 if not exist "!EXTRACTDIR!\*.mum" set "ERRFILE=!LPFILE%%j!"&goto :E_LP
+"!_7z!" e ".\langs\!LPFILE%%j!" -o"!EXTRACTDIR!" langcfg.ini %_Null%
+if exist "!EXTRACTDIR!\langcfg.ini" for /f "tokens=2 delims==" %%i in ('type "!EXTRACTDIR!\langcfg.ini" ^| findstr /i "Language"') do set "LANGUAGE%%j=%%i"
+if not exist "!EXTRACTDIR!\langcfg.ini" for /f "tokens=4 delims=~" %%V in ('"dir "!EXTRACTDIR!\*.mum" /b" %_Nul6%') do set "LANGUAGE%%j=%%i"
 for /f "tokens=7 delims=~." %%g in ('"dir "!EXTRACTDIR!\*.mum" /b" %_Nul6%') do set "LPBUILD%%j=%%g"
 for /f "tokens=3 delims=~" %%V in ('"dir "!EXTRACTDIR!\*.mum" /b" %_Nul6%') do set "LPARCH%%j=%%V"
 del /f /q "!EXTRACTDIR!\*.mum" %_Nul3%
+del /f /q "!EXTRACTDIR!\langcfg.ini" %_Nul3%
 )
 for /L %%j in (1,1,%LANGUAGES%) do (
 if /i !LPARCH%%j!==amd64 (echo !LANGUAGE%%j!: 64-bit {x64} - !LPBUILD%%j!) else (echo !LANGUAGE%%j!: 32-bit {x86} - !LPBUILD%%j!)
