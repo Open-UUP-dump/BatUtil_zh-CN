@@ -1,5 +1,5 @@
 @setlocal DisableDelayedExpansion
-@set uiv=v25.1
+@set uiv=v25.2
 @echo off
 
 set DVDPATH=
@@ -264,7 +264,7 @@ for /L %%j in (1,1,%LANGUAGES%) do (
 if not exist "!EXTRACTDIR!\*.mum" set "ERRFILE=!LPFILE%%j!"&goto :E_LP
 "!_7z!" e ".\langs\!LPFILE%%j!" -o"!EXTRACTDIR!" langcfg.ini %_Null%
 if exist "!EXTRACTDIR!\langcfg.ini" for /f "tokens=2 delims==" %%i in ('type "!EXTRACTDIR!\langcfg.ini" ^| findstr /i "Language"') do set "LANGUAGE%%j=%%i"
-if not exist "!EXTRACTDIR!\langcfg.ini" for /f "tokens=4 delims=~" %%V in ('"dir "!EXTRACTDIR!\*.mum" /b" %_Nul6%') do set "LANGUAGE%%j=%%i"
+if not exist "!EXTRACTDIR!\langcfg.ini" for /f "tokens=4 delims=~" %%V in ('"dir "!EXTRACTDIR!\*.mum" /b" %_Nul6%') do set "LANGUAGE%%j=%%V"
 for /f "tokens=7 delims=~." %%g in ('"dir "!EXTRACTDIR!\*.mum" /b" %_Nul6%') do set "LPBUILD%%j=%%g"
 for /f "tokens=3 delims=~" %%V in ('"dir "!EXTRACTDIR!\*.mum" /b" %_Nul6%') do set "LPARCH%%j=%%V"
 del /f /q "!EXTRACTDIR!\*.mum" %_Nul3%
