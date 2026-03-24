@@ -1,6 +1,6 @@
 <!-- : Begin batch script
 @setlocal DisableDelayedExpansion
-@set uivr=v117
+@set uivr=v121
 @echo off
 :: ### Creation Method ###
 ::
@@ -775,6 +775,7 @@ exit /b
 :doWIM
 set "_chn=/Channel:%channel%"
 if /i "%channel%"=="OEM" if %_build% neq 18362 set "_chn="
+call :wds_add
 %_dism1% /Image:"%_mount%" /LogPath:"%_dLog%\DismVirtualEditions.log" /Set-Edition:%EditionID% %_chn%
 set ERRTEMP=%ERRORLEVEL%
 if %ERRTEMP% neq 0 (
@@ -787,6 +788,7 @@ if /i %EditionID%==ServerRdsh (
 %_Nul3% reg.exe add "HKLM\SYS\Setup\FirstBoot\PreOobe" /f /v 00 /t REG_SZ /d "cmd.exe /c powershell -ep unrestricted -nop -c \"Set-CimInstance -Query 'Select * from Win32_UserAccount WHERE SID LIKE ''S-1-5-21-%%-500''' -Property @{Disabled=0}\" &exit /b 0 "
 %_Nul3% reg.exe unload HKLM\SYS
 )
+call :wds_rem
 %_dism1% /Commit-Image /MountDir:"%_mount%" /Append %_Supp%
 set ERRTEMP=%ERRORLEVEL%
 if %ERRTEMP% neq 0 (
@@ -838,6 +840,19 @@ exit /b
 %_dism1% /Cleanup-Wim %_Nul3%
 if exist "%_mount%\" rmdir /s /q "%_mount%\"
 set _term=1
+exit /b
+
+:wds_add
+if %_build% geq 29550 if %winbuild% lss 20348 if /i not %xOS%==x86 (
+if /i %arch%==%xOS% copy /y %SysPath%\wdscore.dll "%_mount%\Windows\System32\downlevel\" %_Nul1%
+if /i %arch%==x64 if /i %xOS%==amd64 copy /y %SysPath%\wdscore.dll "%_mount%\Windows\System32\downlevel\" %_Nul1%
+if exist "%SystemRoot%\SysWOW64\wdscore.dll" if exist "%_mount%\Windows\SysWOW64\downlevel\*.dll" copy /y %SystemRoot%\SysWOW64\wdscore.dll "%_mount%\Windows\SysWOW64\downlevel\" %_Nul1%
+)
+exit /b
+
+:wds_rem
+if exist "%_mount%\Windows\System32\downlevel\wdscore.dll" del /f /q "%_mount%\Windows\System32\downlevel\wdscore.dll" %_Nul3%
+if exist "%_mount%\Windows\SysWOW64\downlevel\wdscore.dll" del /f /q "%_mount%\Windows\SysWOW64\downlevel\wdscore.dll" %_Nul3%
 exit /b
 
 :ISOCREATE
