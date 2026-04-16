@@ -1,5 +1,5 @@
 @setlocal DisableDelayedExpansion
-@set uiv=v10.59
+@set uiv=v10.59b
 @echo off
 :: enable debug mode, you must also set target and repo (if updates are not beside the script)
 set _Debug=0
@@ -899,6 +899,7 @@ if not exist "!_cabdir!\" mkdir "!_cabdir!"
 if not exist "!_cabdir!\LCUmum\" mkdir "!_cabdir!\LCUmum"
 if not exist "!_cabdir!\LCUall\" mkdir "!_cabdir!\LCUall"
 if %online%==0 if %stcexp%==0 if %_build% geq 22000 if exist "%SysPath%\ucrtbase.dll" call :get_dll dpx
+if %online%==0 if %stcexp%==0 if %_build% lss 17763 if %winbuild% geq 22621 call :get_dll dpx
 if %online%==0 if %LCUmsuExpand% neq 0 if %_build% geq 22621 if %winbuild% geq 9600 (
 if exist "%SysPath%\UpdateCompression.dll" (set psfwim=1) else (if %_build% geq 26052 call :get_dll UpdateCompression)
 if %_build% lss 26052 set psfwim=1
@@ -3067,7 +3068,7 @@ if exist "!_cabdir!\%_f_%" goto :get_end
 
 set msuwim=0
 set "uupmsu="
-if exist "!repo!\*Windows1*-KB*%arch%*.msu" for /f "tokens=* delims=" %%# in ('dir /b /on "!repo!\*Windows1*-KB*%arch%*.msu"') do (
+if %_build% geq 22000 if exist "!repo!\*Windows1*-KB*%arch%*.msu" for /f "tokens=* delims=" %%# in ('dir /b /on "!repo!\*Windows1*-KB*%arch%*.msu"') do (
 expand.exe -d -f:*Windows*.psf "!repo!\%%#" %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set "uupmsu=%%#"&set msuwim=2)
 if %_wlib% equ 1 !_wimlib! dir "!repo!\%%#" %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set "uupmsu=%%#"&set msuwim=1)
 if %_wlib% equ 0 dism.exe /English /List-Image /ImageFile:"!repo!\%%#" /Index:1 %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set "uupmsu=%%#"&set msuwim=1)

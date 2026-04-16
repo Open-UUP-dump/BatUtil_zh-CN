@@ -236,6 +236,9 @@ special thanks for testing and feedback:
 
 <details><summary>changelog</summary>
 
+10.59b:  
+- Build 14393: Use target image dpx.dll to expand updates files if Host OS is Windows 11 22H2 or later
+
 10.59:  
 - Add build 14393 as supported for ESU Suppressor
 - Add detection for 26300 Enablement Package
