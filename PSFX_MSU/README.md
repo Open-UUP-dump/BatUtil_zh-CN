@@ -8,6 +8,7 @@
 
 - Mandatory  : LCU psf file
 - Mandatory  : LCU cab or wim file
+- Mandatory  : LCU mumx.esd file if exist (Windows 11 24H2 and later)
 - Mandatory  : AggregatedMetadata cab file
 - Mandatory  : DesktopDeployment cab file or SSU cab file
 - Recommended: DesktopDeployment cab file and SSU cab file

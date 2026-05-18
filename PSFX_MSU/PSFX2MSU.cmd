@@ -1,5 +1,5 @@
 @setlocal DisableDelayedExpansion
-@set uivr=v0.5
+@set uivr=v0.6
 @echo off
 :: Change to 0 to skip adding SSU to the msu file
 set IncludeSSU=1
@@ -188,6 +188,8 @@ for /f %%# in ('dir /b /a:-d "_tMSU\LCUCompDB_%_MSUkbn%*.xml.cab"') do set "_MSU
 for /f "tokens=3 delims=-_" %%# in ('dir /b /a:-d "*Windows1*%_MSUkbn%*.psf"') do set "arch=%%~n#"
 for /f "delims=" %%# in ('dir /b /a:-d "*Windows1*%_MSUkbn%*%arch%*.%xmf%"') do set "_MSUcab=%%#"
 for /f "delims=" %%# in ('dir /b /a:-d "*Windows1*%_MSUkbn%*%arch%*.psf"') do set "_MSUpsf=%%#"
+set "_MSUmum="
+if exist "*Windows1*%_MSUkbn%*.mumx.esd" for /f "delims=" %%# in ('dir /b /a:-d "*Windows1*%_MSUkbn%*%arch%*.mumx.esd"') do set "_MSUmum=%%#"
 set "_MSUkbf=Windows10.0-%_MSUkbn%-%arch%"
 echo %_MSUcab%| findstr /i "Windows11\." %_Nul1% && set "_MSUkbf=Windows11.0-%_MSUkbn%-%arch%"
 echo %_MSUcab%| findstr /i "Windows12\." %_Nul1% && set "_MSUkbf=Windows12.0-%_MSUkbn%-%arch%"
@@ -246,6 +248,7 @@ echo "_tMSU\%_MSUonf%" "%_MSUonf%"
 if %optSSU% equ 1 echo "%_MSUssu%" "%_MSUtsu%"
 echo "%_MSUcab%" "%_MSUkbf%.cab"
 echo "%_MSUpsf%" "%_MSUkbf%.psf"
+if defined _MSUmum echo "%_MSUmum%" "%_MSUkbf%.mumx.esd"
 )>>zzz.ddf
 %_Null% makecab.exe /F zzz.ddf /D Compress=OFF
 if %ERRORLEVEL% neq 0 (
@@ -267,6 +270,7 @@ copy /y "_tMSU\%_MSUonf%" "_tWIM\%_MSUonf%" %_Nul3%
 if %optSSU% equ 1 copy /y "%_MSUssu%" "_tWIM\%_MSUtsu%" %_Nul3%
 copy /y "%_MSUcab%" "_tWIM\%_MSUkbf%.wim" %_Nul3%
 copy /y "%_MSUpsf%" "_tWIM\%_MSUkbf%.psf" %_Nul3%
+if defined _MSUmum copy /y "%_MSUmum%" "_tWIM\%_MSUkbf%.mumx.esd" %_Nul3%
 %_Nul3% "!_work!\bin\imagex_%xBT%.exe" /CAPTURE _tWIM\ %_MSUkbf%.msu content /COMPRESS none /NOACL ALL /NOTADMIN /TEMP "!_temp!"
 if %ERRORLEVEL% neq 0 (
 echo.
