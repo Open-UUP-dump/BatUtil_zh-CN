@@ -236,6 +236,15 @@ special thanks for testing and feedback:
 
 <details><summary>changelog</summary>
 
+10.60:  
+- Update ISO\sources\unbcl.dll from install.wim for builds 26100+
+- Skip updating bootmgr file (BIOS setup) when UpdtBootFiles is enabled
+- Add/Update boot.pnd.stl to the iso media along with boot.stl
+- Skip adding expanded baseline KB5043080 to WinPE if newer LCU already integrated
+
+10.59s:  
+- Always add boot.stl to the ISO media, similar to bootmgr.efi/bootmgfw.efi
+
 10.59b:  
 - Build 14393: Use target image dpx.dll to expand updates files if Host OS is Windows 11 22H2 or later
 

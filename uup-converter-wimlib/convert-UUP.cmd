@@ -1,7 +1,7 @@
 <!-- : 批处理脚本开始 
 @chcp 65001 >nul
 @setlocal DisableDelayedExpansion
-@set uivr=v121
+@set uivr=v123
 @echo off
 :: 如需启用调试模式，请将参数设置为 1 
 set _Debug=0
@@ -1087,6 +1087,12 @@ if !errorlevel! neq 0 (
   (echo.&echo 对 boot.wim 的 Dism.exe Set-TargetPath 命令执行失败)>>"!logerr!" 
   )
 call :wds_rem
+if %_build% geq 22000 (
+reg.exe load "HKLM\WinPEwim" "%_mount%\Windows\System32\Config\SOFTWARE" %_Nul3%
+reg.exe add "HKLM\WinPEwim\%_wper%" /f /v CustomBackground /t REG_EXPAND_SZ /d "%_root%\System32\winre.jpg" %_Nul3%
+reg.exe delete "HKLM\WinPEwim\%_wper%" /f /v CustomShell %_Nul3%
+reg.exe unload "HKLM\WinPEwim" %_Nul3%
+)
 %_dism1% /Unmount-Wim /MountDir:"%_mount%" /Commit %_Supp%
 set ERRTEMP=%ERRORLEVEL%
 if %ERRTEMP% neq 0 (
@@ -1105,7 +1111,7 @@ offlinereg.exe .\bin\temp\SOFTWARE.new "Microsoft\Windows NT\CurrentVersion" set
 del /f /q .\bin\temp\SOFTWARE
 ren .\bin\temp\SOFTWARE.new SOFTWARE
 type nul>bin\boot-wim.txt
->>bin\boot-wim.txt echo add 'bin^\temp^\SOFTWARE' '^\Windows^\System32^\config^\SOFTWARE'
+>>bin\boot-wim.txt echo add 'bin^\temp^\SOFTWARE.new' '^\Windows^\System32^\config^\SOFTWARE'
 set "_bkimg="
 if exist "ISOFOLDER\Sources\winpe.jpg" del /f /q ISOFOLDER\Sources\winpe.jpg %_Nul3%
 wimlib-imagex.exe extract ISOFOLDER\Sources\boot.wim 1 Windows\System32\winpe.jpg --dest-dir=ISOFOLDER\Sources --no-acls --no-attributes --nullglob %_Null%
@@ -2312,6 +2318,7 @@ expand.exe -r -f:* "!_UUP!\%%~#" "%_cabdir%\du" %_Nul1%
 )
 if %_build% geq 26100 (
 if exist "%SystemRoot%\temp\ServicingCommon.dll" if not exist "%_cabdir%\du\ServicingCommon.dll" copy /y "%SystemRoot%\temp\ServicingCommon.dll" "%_cabdir%\du\" %_Nul3%
+if exist "%SystemRoot%\temp\unbcl.dll" if not exist "%_cabdir%\du\unbcl.dll" copy /y "%SystemRoot%\temp\unbcl.dll" "%_cabdir%\du\" %_Nul3%
 )
 xcopy /CDRUY "%_cabdir%\du" "ISOFOLDER\Sources\" %_Nul3%
 if exist "%_cabdir%\du\*.ini" xcopy /CDRY "%_cabdir%\du\*.ini" "ISOFOLDER\Sources\" %_Nul3%
@@ -3881,6 +3888,8 @@ goto :skiphand1
 if exist "%_target%\EFI\Boot\bootmgfw.efi" xcopy /CIDRY "%_mount%\Windows\Boot\EFI\bootmgfw.efi" "%_target%\EFI\Boot\bootmgfw.efi" %_Nul3%
 xcopy /CIDRY "%_mount%\Windows\Boot\EFI\bootmgfw.efi" "%_target%\EFI\Boot\!efifile!" %_Nul3%
 xcopy /CIDRY "%_mount%\Windows\Boot\EFI\bootmgr.efi" "%_target%\" %_Nul3%
+xcopy /CIDRY "%_mount%\Windows\Boot\EFI\boot.stl" "%_target%\efi\microsoft\boot\" %_Nul3%
+xcopy /CIDRY "%_mount%\Windows\Boot\EFI\boot.pnd.stl" "%_target%\efi\microsoft\boot\" %_Nul3%
 :skiphand1
 if !handle2! equ 0 if not exist "%_mount%\Windows\Servicing\Packages\*WinPE-LanguagePack*.mum" if exist "%_mount%\Windows\Servicing\Packages\Package_for_RollupFix*.mum" (
 set handle2=1
@@ -4540,6 +4549,8 @@ set "_SxsCfg=Microsoft\Windows\CurrentVersion\SideBySide\Configuration"
 set "_CBS=Microsoft\Windows\CurrentVersion\Component Based Servicing\Packages"
 set "_IFEO=HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\dismhost.exe"
 set _MOifeo=0
+set "_wper=Microsoft\Windows NT\CurrentVersion\WinPE"
+set _root=^%%SystemRoot^%%
 goto :eof
 
 :postVars
