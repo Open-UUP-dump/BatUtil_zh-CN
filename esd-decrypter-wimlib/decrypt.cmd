@@ -1,6 +1,6 @@
 <!-- : Begin batch script
 @setlocal DisableDelayedExpansion
-@set uivr=v66
+@set uivr=v67
 @echo off
 :: ### Auto processing option ###
 :: 1 - create ISO with install.wim
@@ -651,10 +651,6 @@ wimlib-imagex.exe extract "!SrcEsd!" 1 sources\setuphost.exe --dest-dir=.\bin\te
 wimlib-imagex.exe extract "!SrcEsd!" 3 Windows\System32\ntoskrnl.exe --dest-dir=.\bin\temp --no-acls --no-attributes %_Null%
 7z.exe l .\bin\temp\ntoskrnl.exe >.\bin\temp\version.txt 2>&1
 )
-if %_build% geq 22478 (
-wimlib-imagex.exe extract "!SrcEsd!" 3 Windows\System32\UpdateAgent.dll --dest-dir=.\bin\temp --no-acls --no-attributes %_Nul3%
-if exist "bin\temp\UpdateAgent.dll" 7z.exe l .\bin\temp\UpdateAgent.dll >.\bin\temp\version.txt 2>&1
-)
 for /f "tokens=4-7 delims=.() " %%i in ('"findstr /i /b "FileVersion" .\bin\temp\version.txt" %_Nul6%') do (set uupver=%%i.%%j&set uupmaj=%%i&set uupmin=%%j&set branch=%%k&set uupdate=%%l)
 set revver=%uupver%&set revmaj=%uupmaj%&set revmin=%uupmin%
 set "tok=6,7"&set "toe=5,6,7"
@@ -664,7 +660,7 @@ if exist "bin\temp\*_microsoft-windows-coreos-revision*.manifest" for /f "tokens
 if %_build% geq 15063 (
 wimlib-imagex.exe extract "!SrcEsd!" 4 Windows\System32\config\SOFTWARE --dest-dir=.\bin\temp --no-acls --no-attributes %_Null%
 set "isokey=Microsoft\Windows NT\CurrentVersion\Update\TargetingInfo\Installed"
-for /f %%i in ('"offlinereg.exe .\bin\temp\SOFTWARE "!isokey!" enumkeys %_Nul6% ^| findstr /i /r ".*\.OS""') do if not errorlevel 1 (
+for /f %%i in ('"offlinereg.exe .\bin\temp\SOFTWARE "!isokey!" enumkeys %_Nul6% ^| findstr /i /r "Client\.OS Server\.OS""') do if not errorlevel 1 (
   for /f "tokens=3 delims==:" %%A in ('"offlinereg.exe .\bin\temp\SOFTWARE "!isokey!\%%i" getvalue Branch %_Nul6%"') do set "revbranch=%%~A"
   for /f "tokens=5,6 delims==:." %%A in ('"offlinereg.exe .\bin\temp\SOFTWARE "!isokey!\%%i" getvalue Version %_Nul6%"') do if %%A gtr !revmaj! (
     set "revver=%%~A.%%B
@@ -673,6 +669,13 @@ for /f %%i in ('"offlinereg.exe .\bin\temp\SOFTWARE "!isokey!" enumkeys %_Nul6% 
     )
   )
 )
+set chkmin=%revmin%
+if %_build% geq 17133 (
+call :setuphostprep
+for /f "tokens=4-7 delims=.() " %%i in ('"findstr /i /b "FileVersion" .\bin\version.txt" %_Nul6%') do (set uupver=%%i.%%j&set uupmaj=%%i&set uupmin=%%j&set branch=%%k&set uupdate=%%l)
+del /f /q .\bin\version.txt %_Nul3%
+)
+:: set "isotime=!uupdate:~2,2!/!uupdate:~4,2!/20!uupdate:~0,2!,!uupdate:~7,2!:!uupdate:~9,2!:10"
 if defined revbranch set branch=%revbranch%
 if %revmaj%==18363 (
 if /i "%branch:~0,4%"=="19h1" set branch=19h2%branch:~4%
@@ -705,23 +708,29 @@ if %revmaj%==26200 (
 if /i "%branch:~0,2%"=="ge" set branch=25h2_ge%branch:~2%
 if %uupver:~0,5%==26100 set uupver=26200%uupver:~5%
 )
+if %revmaj%==26300 (
+if /i "%branch:~0,2%"=="ge" set branch=26h2_ge%branch:~2%
+if %uupver:~0,5%==26100 set uupver=26300%uupver:~5%
+)
 if %uupmin% lss %revmin% (
 set uupver=%revver%
 set uupmin=%revmin%
 if not exist "%SystemRoot%\temp\" mkdir "%SystemRoot%\temp" %_Nul3%
-wimlib-imagex.exe extract "!SrcEsd!" 4 Windows\servicing\Packages\Package_for_RollupFix*.mum --dest-dir=%SystemRoot%\temp --no-acls --no-attributes %_Nul3%
-for /f %%# in ('dir /b /a:-d /od %SystemRoot%\temp\Package_for_RollupFix*.mum') do set "mumfile=%SystemRoot%\temp\%%#"
-set "chkfile=!mumfile:\=\\!"
-if %_cwmi% equ 1 for /f "tokens=2 delims==" %%# in ('wmic datafile where "name='!chkfile!'" get LastModified /value') do set "mumdate=%%#"
-if %_cwmi% equ 0 for /f %%# in ('%_psc% "([WMI]'CIM_DataFile.Name=''!chkfile!''').LastModified"') do set "mumdate=%%#"
-del /f /q %SystemRoot%\temp\*.mum
-set "uupdate=!mumdate:~2,2!!mumdate:~4,2!!mumdate:~6,2!-!mumdate:~8,4!"
+wimlib-imagex.exe extract "!SrcEsd!" 4 Windows\servicing\Packages\Package_for_RollupFix*.mum --dest-dir=.\bin\temp --no-acls --no-attributes %_Nul3%
+for /f %%# in ('dir /b /a:-d /od bin\temp\Package_for_RollupFix*.mum') do copy /y "bin\temp\%%#" %SystemRoot%\temp\update.mum %_Nul1%
+call :datemum uupdate isotime
+)
+if %uupmin% gtr %revmin% (
+if not exist "%SystemRoot%\temp\" mkdir "%SystemRoot%\temp" %_Nul3%
+wimlib-imagex.exe extract "%ISOdir%\sources\%WimFile%" 1 Windows\servicing\Packages\Package_for_RollupFix*.mum --dest-dir=%SystemRoot%\temp --no-acls --no-attributes %_Nul3%
+if not exist "%SystemRoot%\temp\Package_for_RollupFix*.mum" set branch=WinBuild
 )
 set _legacy=
 set _useold=0
 if /i "%branch%"=="WinBuild" set _useold=1
 if /i "%branch%"=="GitEnlistment" set _useold=1
 if /i "%uupdate%"=="winpbld" set _useold=1
+if /i "%uupdate%"=="160101" set _useold=1
 if %_useold% equ 1 (
 wimlib-imagex.exe extract "!SrcEsd!" 4 Windows\System32\config\SOFTWARE --dest-dir=.\bin\temp --no-acls --no-attributes %_Null%
 for /f "tokens=3 delims==:" %%# in ('"offlinereg.exe .\bin\temp\SOFTWARE "Microsoft\Windows NT\CurrentVersion" getvalue BuildLabEx" %_Nul6%') do if not errorlevel 1 (for /f "tokens=1-5 delims=." %%i in ('echo %%~#') do set _legacy=%%i.%%j.%%m.%%l&set branch=%%l)
@@ -731,6 +740,7 @@ rmdir /s /q bin\temp\
 
 set _rfr=refresh
 set _rsr=release_svc_%_rfr%
+if %revmaj%==26300 (set _label=%revver%.%_time%.26h2_ge_%_rsr%&set branch=26h2_ge_%_rsr%)
 if %revmaj%==26200 (set _label=%revver%.%_time%.25h2_ge_%_rsr%&set branch=25h2_ge_%_rsr%)
 if %revver%==26200.8653 (set _label=26200.8653.260606-0206.25h2_ge_%_rsr%&set branch=25h2_ge_%_rsr%&set ISOnameESD=0)
 if %revver%==26200.8457 (set _label=26200.8457.260507-0702.25h2_ge_%_rsr%&set branch=25h2_ge_%_rsr%&set ISOnameESD=0)
@@ -879,6 +889,68 @@ if /i %editionid%==ServerDatacenterCore (if %VOL% equ 1 (set DVDLABEL=SSS_%archl
 if /i %editionid%==ServerTurbine (if %VOL% equ 1 (set DVDLABEL=SADC_%archl%FREV_%langid%_%_ddv%&set DVDISO=%_label%TURBINE_VOL_%archl%FRE_%langid%) else (set DVDLABEL=SADC_%archl%FRE_%langid%_%_ddv%&set DVDISO=%_label%TURBINE_OEMRET_%archl%FRE_%langid%))&exit /b
 if /i %editionid%==ServerTurbineCore (if %VOL% equ 1 (set DVDLABEL=SADC_%archl%FREV_%langid%_%_ddv%&set DVDISO=%_label%TURBINECOR_VOL_%archl%FRE_%langid%) else (set DVDLABEL=SADC_%archl%FRE_%langid%_%_ddv%&set DVDISO=%_label%TURBINECOR_OEMRET_%archl%FRE_%langid%))&exit /b
 if /i %editionid%==ServerAzureStackHCICor set DVDLABEL=SASH_%archl%FRE_%langid%_%_ddv%&set DVDISO=%_label%AZURESTACKHCI_RET_%archl%FRE_%langid%&exit /b
+exit /b
+
+:datemum
+set "mumfile=%SystemRoot%\temp\update.mum"
+set "chkfile=!mumfile:\=\\!"
+if %_cwmi% equ 1 for /f "tokens=2 delims==" %%# in ('wmic datafile where "name='!chkfile!'" get LastModified /value') do set "mumdate=%%#"
+if %_cwmi% equ 0 for /f %%# in ('%_psc% "([WMI]'CIM_DataFile.Name=''!chkfile!''').LastModified"') do set "mumdate=%%#"
+del /f /q %SystemRoot%\temp\*.mum
+set "%1=!mumdate:~2,2!!mumdate:~4,2!!mumdate:~6,2!-!mumdate:~8,4!"
+:: set "%2=!mumdate:~4,2!/!mumdate:~6,2!/!mumdate:~0,4!,!mumdate:~8,2!:!mumdate:~10,2!:!mumdate:~12,2!"
+exit /b
+
+:setuphostprep
+wimlib-imagex.exe extract "!SrcEsd!" 1 sources\setuphost.exe --dest-dir=%SystemRoot%\temp --no-acls --no-attributes %_Null%
+wimlib-imagex.exe extract "!SrcEsd!" 1 sources\setupprep.exe --dest-dir=%SystemRoot%\temp --no-acls --no-attributes %_Null%
+wimlib-imagex.exe extract "!SrcEsd!" 4 Windows\system32\UpdateAgent.dll --dest-dir=%SystemRoot%\temp --no-acls --no-attributes %_Null%
+wimlib-imagex.exe extract "!SrcEsd!" 4 Windows\system32\Facilitator.dll --dest-dir=%SystemRoot%\temp --no-acls --no-attributes %_Null%
+set _svr1=0&set _svr2=0&set _svr3=0&set _svr4=0
+set "_fvr1=%SystemRoot%\temp\setuphost.exe"
+set "_fvr2=%SystemRoot%\temp\setupprep.exe"
+set "_fvr3=%SystemRoot%\temp\UpdateAgent.dll"
+set "_fvr4=%SystemRoot%\temp\Facilitator.dll"
+set "cfvr1=!_fvr1:\=\\!"
+set "cfvr2=!_fvr2:\=\\!"
+set "cfvr3=!_fvr3:\=\\!"
+set "cfvr4=!_fvr4:\=\\!"
+if %_cwmi% equ 1 (
+if exist "!_fvr1!" for /f "tokens=5 delims==." %%a in ('wmic datafile where "name='!cfvr1!'" get Version /value ^| find "="') do set /a "_svr1=%%a"
+if exist "!_fvr2!" for /f "tokens=5 delims==." %%a in ('wmic datafile where "name='!cfvr2!'" get Version /value ^| find "="') do set /a "_svr2=%%a"
+if exist "!_fvr3!" for /f "tokens=5 delims==." %%a in ('wmic datafile where "name='!cfvr3!'" get Version /value ^| find "="') do set /a "_svr3=%%a"
+if exist "!_fvr4!" for /f "tokens=5 delims==." %%a in ('wmic datafile where "name='!cfvr4!'" get Version /value ^| find "="') do set /a "_svr4=%%a"
+)
+if %_cwmi% equ 0 (
+if exist "!_fvr1!" for /f "tokens=4 delims=." %%a in ('%_psc% "([WMI]'CIM_DataFile.Name=''!cfvr1!''').Version"') do set /a "_svr1=%%a"
+if exist "!_fvr2!" for /f "tokens=4 delims=." %%a in ('%_psc% "([WMI]'CIM_DataFile.Name=''!cfvr2!''').Version"') do set /a "_svr2=%%a"
+if exist "!_fvr3!" for /f "tokens=4 delims=." %%a in ('%_psc% "([WMI]'CIM_DataFile.Name=''!cfvr3!''').Version"') do set /a "_svr3=%%a"
+if exist "!_fvr4!" for /f "tokens=4 delims=." %%a in ('%_psc% "([WMI]'CIM_DataFile.Name=''!cfvr4!''').Version"') do set /a "_svr4=%%a"
+)
+set "_chk=!_fvr1!"
+if %chkmin% equ %_svr1% set "_chk=!_fvr1!"&goto :prephostsetup
+if %chkmin% equ %_svr2% set "_chk=!_fvr2!"&goto :prephostsetup
+if %chkmin% equ %_svr3% set "_chk=!_fvr3!"&goto :prephostsetup
+if %chkmin% equ %_svr4% set "_chk=!_fvr4!"&goto :prephostsetup
+if %_svr2% gtr %_svr1% (
+if %_svr2% gtr %_svr3% if %_svr2% gtr %_svr4% set "_chk=!_fvr2!"
+if %_svr3% gtr %_svr2% if %_svr3% gtr %_svr4% set "_chk=!_fvr3!"
+if %_svr4% gtr %_svr2% if %_svr4% gtr %_svr3% set "_chk=!_fvr4!"
+)
+if %_svr3% gtr %_svr1% (
+if %_svr2% gtr %_svr3% if %_svr2% gtr %_svr4% set "_chk=!_fvr2!"
+if %_svr3% gtr %_svr2% if %_svr3% gtr %_svr4% set "_chk=!_fvr3!"
+if %_svr4% gtr %_svr2% if %_svr4% gtr %_svr3% set "_chk=!_fvr4!"
+)
+if %_svr4% gtr %_svr1% (
+if %_svr2% gtr %_svr3% if %_svr2% gtr %_svr4% set "_chk=!_fvr2!"
+if %_svr3% gtr %_svr2% if %_svr3% gtr %_svr4% set "_chk=!_fvr3!"
+if %_svr4% gtr %_svr2% if %_svr4% gtr %_svr3% set "_chk=!_fvr4!"
+)
+
+:prephostsetup
+7z.exe l "%_chk%" >.\bin\version.txt 2>&1
+del /f /q "!_fvr1!" "!_fvr2!" "!_fvr3!" "!_fvr4!" %_Nul3%
 exit /b
 
 :setloop

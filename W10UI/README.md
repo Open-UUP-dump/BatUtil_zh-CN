@@ -236,6 +236,10 @@ special thanks for testing and feedback:
 
 <details><summary>changelog</summary>
 
+10.61:  
+- Prioritize SetupHost.exe and SetupPrep.exe for detecting ISO label (branch and timestamp)
+- Add label correction for version 26H2 (assuming it will be build 26300)
+
 10.60:  
 - Update ISO\sources\unbcl.dll from install.wim for builds 26100+
 - Skip updating bootmgr file (BIOS setup) when UpdtBootFiles is enabled
