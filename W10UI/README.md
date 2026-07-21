@@ -236,6 +236,9 @@ special thanks for testing and feedback:
 
 <details><summary>changelog</summary>
 
+10.62:  
+- Add wlanapi.dll and mobilenetworking.dll to boot.wim for builds 26100+
+
 10.61:  
 - Prioritize SetupHost.exe and SetupPrep.exe for detecting ISO label (branch and timestamp)
 - Add label correction for version 26H2 (assuming it will be build 26300)

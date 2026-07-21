@@ -1,4 +1,5 @@
 @setlocal DisableDelayedExpansion
+@set uivr=v11.3
 @echo off
 set "_cmdf=%~f0"
 if exist "%SystemRoot%\Sysnative\cmd.exe" (
@@ -51,7 +52,7 @@ set "_ini=%~dp0"
 for /f "skip=2 tokens=2*" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop') do call set "_dsk=%%b"
 if exist "%SystemDrive%\Users\Public\Desktop\desktop.ini" set "_dsk=%SystemDrive%\Users\Public\Desktop"
 
-@title Office Click-to-Run Configurator - Retail
+@title Office Click-to-Run Configurator - Retail / %uivr%
 setlocal EnableDelayedExpansion
 set lpid=(ar-SA,bg-BG,cs-CZ,da-DK,de-DE,el-GR,en-US,es-ES,et-EE,fi-FI,fr-FR,he-IL,hr-HR,hu-HU,it-IT,ja-JP,ko-KR,lt-LT,lv-LV,nb-NO,nl-NL,pl-PL,pt-BR,pt-PT,ro-RO,ru-RU,sk-SK,sl-SI,sr-Latn-RS,sv-SE,th-TH,tr-TR,uk-UA,zh-CN,zh-TW,hi-IN,id-ID,kk-KZ,MS-MY,vi-VN,en-GB,es-MX,fr-CA)
 set lcid=(1025,1026,1029,1030,1031,1032,1033,3082,1061,1035,1036,1037,1050,1038,1040,1041,1042,1063,1062,1044,1043,1045,1046,2070,1048,1049,1051,1060,9242,1053,1054,1055,1058,2052,1028,1081,1057,1087,1086,1066,2057,2058,3084)
@@ -453,24 +454,24 @@ set CTRvcab=v64_%CTRver%.cab&set CTRicab=i640.cab&set CTRicabr=i64%CTRprm%.cab&s
 
 :XmlCheck
 set _O2019=1
-set _O2021=1
-set _O2024=1
+set _O2021=0
+set _O2024=0
 set _D24PF=1
 set _D24ST=1
 set _D24SB=1
-if %verchk% lss 14026 set _O2021=0
-if %verchk% lss 17101 set _O2024=0
+if %verchk% geq 14026 set _O2021=1
+if %verchk% geq 17101 set _O2024=1
 del /f /q "!_temp!\*.xml" "!_temp!\*.dat" 1>nul 2>nul
 expand.exe -f:*.xml "!CTRsource!\Office\Data\%CTRvcab%" "!_temp!." 1>nul 2>nul
 expand.exe -f:*.xml "!CTRsource!\Office\Data\%CTRver%\%CTRscab%" "!_temp!." 1>nul 2>nul
 expand.exe -f:*.x-none.man.dat "!CTRsource!\Office\Data\%CTRver%\%CTRscab%" "!_temp!." 1>nul 2>nul
 pushd "!_temp!"
 find /i "Word2019Volume" "VersionDescriptor.xml" 1>nul 2>nul || set _O2019=0
-find /i "Word2021Volume" "MasterDescriptor.x-none.xml" 1>nul 2>nul || set _O2021=0
-find /i "Word2024Volume" "MasterDescriptor.x-none.xml" 1>nul 2>nul || set _O2024=0
+find /i "Word2021Volume" "MasterDescriptor.x-none.xml" 1>nul 2>nul && set _O2021=1
+find /i "Word2024Volume" "MasterDescriptor.x-none.xml" 1>nul 2>nul && set _O2024=1
 if exist "*.x-none.man.dat" (
-findstr /r "W.o.r.d.2.0.2.1.V.L._.K.M.S." *x-none.man.dat >nul || set _O2021=0
-findstr /r "W.o.r.d.2.0.2.4.V.L._.K.M.S." *x-none.man.dat >nul || set _O2024=0
+findstr /r "W.o.r.d.2.0.2.1.V.L._.K.M.S." *x-none.man.dat >nul && set _O2021=1
+findstr /r "W.o.r.d.2.0.2.4.V.L._.K.M.S." *x-none.man.dat >nul && set _O2024=1
 )
 if exist "*.x-none.man.dat" if %_O2024%==1 (
 findstr /r "P.r.o.f.e.s.s.i.o.n.a.l.2.0.2.4.R._.R.e.t.a.i.l." *x-none.man.dat >nul || set _D24PF=0

@@ -1,4 +1,5 @@
 @setlocal DisableDelayedExpansion
+@set uivr=v11.3
 @echo off
 set "_cmdf=%~f0"
 if exist "%SystemRoot%\Sysnative\cmd.exe" (
@@ -17,13 +18,14 @@ if exist "%SystemRoot%\Sysnative\reg.exe" (
 set "SysPath=%SystemRoot%\Sysnative"
 set "Path=%SystemRoot%\Sysnative;%SystemRoot%;%SystemRoot%\Sysnative\Wbem;%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\;%Path%"
 )
+set "_psc=powershell -nop -c"
 set "_err===== ERROR ===="
 set winbuild=1
 for /f "tokens=6 delims=[]. " %%G in ('ver') do set winbuild=%%G
 if %winbuild% lss 7601 goto :E_Win
 set _cwmi=0
 for %%# in (wmic.exe) do @if not "%%~$PATH:#"=="" (
-wmic path Win32_ComputerSystem get CreationClassName /value 2>nul | find /i "ComputerSystem" 1>nul && set _cwmi=1
+cmd /c "wmic path Win32_ComputerSystem get CreationClassName /value" 2>nul | find /i "ComputerSystem" 1>nul && set _cwmi=1
 )
 set _pwsh=1
 for %%# in (powershell.exe) do @if "%%~$PATH:#"=="" set _pwsh=0
@@ -50,7 +52,7 @@ set "_ini=%~dp0"
 for /f "skip=2 tokens=2*" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop') do call set "_dsk=%%b"
 if exist "%SystemDrive%\Users\Public\Desktop\desktop.ini" set "_dsk=%SystemDrive%\Users\Public\Desktop"
 
-@title Office Click-to-Run Configurator - Volume
+@title Office Click-to-Run Configurator - Volume / %uivr%
 setlocal EnableDelayedExpansion
 set lpid=(ar-SA,bg-BG,cs-CZ,da-DK,de-DE,el-GR,en-US,es-ES,et-EE,fi-FI,fr-FR,he-IL,hr-HR,hu-HU,it-IT,ja-JP,ko-KR,lt-LT,lv-LV,nb-NO,nl-NL,pl-PL,pt-BR,pt-PT,ro-RO,ru-RU,sk-SK,sl-SI,sr-Latn-RS,sv-SE,th-TH,tr-TR,uk-UA,zh-CN,zh-TW,hi-IN,id-ID,kk-KZ,MS-MY,vi-VN,en-GB,es-MX,fr-CA)
 set lcid=(1025,1026,1029,1030,1031,1032,1033,3082,1061,1035,1036,1037,1050,1038,1040,1041,1042,1063,1062,1044,1043,1045,1046,2070,1048,1049,1051,1060,9242,1053,1054,1055,1058,2052,1028,1081,1057,1087,1086,1066,2057,2058,3084)
@@ -452,21 +454,21 @@ set CTRvcab=v64_%CTRver%.cab&set CTRicab=i640.cab&set CTRicabr=i64%CTRprm%.cab&s
 
 :XmlCheck
 set _O2019=1
-set _O2021=1
-set _O2024=1
-if %verchk% lss 14026 set _O2021=0
-if %verchk% lss 17101 set _O2024=0
+set _O2021=0
+set _O2024=0
+if %verchk% geq 14026 set _O2021=1
+if %verchk% geq 17101 set _O2024=1
 del /f /q "!_temp!\*.xml" "!_temp!\*.dat" 1>nul 2>nul
 expand.exe -f:*.xml "!CTRsource!\Office\Data\%CTRvcab%" "!_temp!." 1>nul 2>nul
 expand.exe -f:*.xml "!CTRsource!\Office\Data\%CTRver%\%CTRscab%" "!_temp!." 1>nul 2>nul
 expand.exe -f:*.x-none.man.dat "!CTRsource!\Office\Data\%CTRver%\%CTRscab%" "!_temp!." 1>nul 2>nul
 pushd "!_temp!"
 find /i "Word2019Volume" "VersionDescriptor.xml" 1>nul 2>nul || set _O2019=0
-find /i "Word2021Volume" "MasterDescriptor.x-none.xml" 1>nul 2>nul || set _O2021=0
-find /i "Word2024Volume" "MasterDescriptor.x-none.xml" 1>nul 2>nul || set _O2024=0
+find /i "Word2021Volume" "MasterDescriptor.x-none.xml" 1>nul 2>nul && set _O2021=1
+find /i "Word2024Volume" "MasterDescriptor.x-none.xml" 1>nul 2>nul && set _O2024=1
 if exist "*.x-none.man.dat" (
-findstr /r "W.o.r.d.2.0.2.1.V.L._.K.M.S." *x-none.man.dat >nul || set _O2021=0
-findstr /r "W.o.r.d.2.0.2.4.V.L._.K.M.S." *x-none.man.dat >nul || set _O2024=0
+findstr /r "W.o.r.d.2.0.2.1.V.L._.K.M.S." *x-none.man.dat >nul && set _O2021=1
+findstr /r "W.o.r.d.2.0.2.4.V.L._.K.M.S." *x-none.man.dat >nul && set _O2024=1
 )
 for /f "tokens=3 delims=<= " %%# in ('find /i "DeliveryMechanism" "VersionDescriptor.xml" 2^>nul') do set "FFNRoot=%%~#"
 popd
@@ -860,7 +862,7 @@ set /a cc=0
 set /a kk=0
 if %_O24Pro%==ON (
 if %winbuild% lss 10240 (set _suite=O365ProPlusRetail&set _suit2=ProPlus2024Volume) else (set _suite=ProPlus2024Volume)
-set _pkey0=NBBBB-BBBBB-BBBBB-BBBJD-VXRPM
+set _pkey0=XJ2XN-FW8RK-P4HMP-DKDBV-GCVGB
 ) else if %_O24Std%==ON (
 if %winbuild% lss 10240 (set _suite=StandardRetail&set _suit2=Standard2024Volume) else (set _suite=Standard2024Volume)
 set _pkey0=V28N4-JG22K-W66P8-VTMGK-H6HGR
@@ -1090,7 +1092,7 @@ if %_O24PrjPro%==ON (
 set /a cc+=1
 if %winbuild% lss 10240 (set _sku!cc!=ProjectProRetail&set /a cc+=1&set _sku!cc!=ProjectPro2024Volume) else (set _sku!cc!=ProjectPro2024Volume)
 set /a kk+=1
-set _pkey!kk!=NBBBB-BBBBB-BBBBB-BBBH4-GX3R4
+set _pkey!kk!=FQQ23-N4YCY-73HQ3-FM9WC-76HF4
 ) else if %_O24PrjStd%==ON (
 set /a cc+=1
 if %winbuild% lss 10240 (set _sku!cc!=ProjectStdRetail&set /a cc+=1&set _sku!cc!=ProjectStd2024Volume) else (set _sku!cc!=ProjectStd2024Volume)
@@ -1132,7 +1134,7 @@ if %_O24VisPro%==ON (
 set /a cc+=1
 if %winbuild% lss 10240 (set _sku!cc!=VisioProRetail&set /a cc+=1&set _sku!cc!=VisioPro2024Volume) else (set _sku!cc!=VisioPro2024Volume)
 set /a kk+=1
-set _pkey!kk!=NBBBB-BBBBB-BBBBB-BBBCW-6MX6T
+set _pkey!kk!=B7TN8-FJ8V3-7QYCP-HQPMV-YY89G
 ) else if %_O24VisStd%==ON (
 set /a cc+=1
 if %winbuild% lss 10240 (set _sku!cc!=VisioStdRetail&set /a cc+=1&set _sku!cc!=VisioStd2024Volume) else (set _sku!cc!=VisioStd2024Volume)
@@ -1468,7 +1470,7 @@ goto :MenuFinal
 :MenuFinal2
 cls
 if %_cwmi% equ 1 for /f "tokens=2 delims==." %%# in ('wmic os get localdatetime /value') do set "_date=%%#"
-if %_cwmi% equ 0 for /f "tokens=1 delims=." %%# in ('powershell -nop -c "([WMI]'Win32_OperatingSystem=@').LocalDateTime"') do set "_date=%%#"
+if %_cwmi% equ 0 for /f "tokens=1 delims=." %%# in ('%_psc% "([WMI]'Win32_OperatingSystem=@').LocalDateTime"') do set "_date=%%#"
 copy /y nul "!_work!\#.rw" 1>nul 2>nul && (if exist "!_work!\#.rw" del /f /q "!_work!\#.rw") || (set "_ini=!_dsk!")
 
 (
@@ -1555,7 +1557,7 @@ set "cfile=!_file:\=\\!"
 if exist "!_file!" if %_cwmi% equ 1 for /f "tokens=4 delims==." %%i in ('wmic datafile where "name='!cfile!'" get Version /value ^| find "="') do (
   if %%i geq %verchk% (set CTRexe=0)
 )
-if exist "!_file!" if %_cwmi% equ 0 for /f "tokens=3 delims==." %%i in ('powershell -nop -c "([WMI]'CIM_DataFile.Name=''!cfile!''').Version"') do (
+if exist "!_file!" if %_cwmi% equ 0 for /f "tokens=3 delims==." %%i in ('%_psc% "([WMI]'CIM_DataFile.Name=''!cfile!''').Version"') do (
   if %%i geq %verchk% (set CTRexe=0)
 )
 call :StopService 1>nul 2>nul

@@ -1,4 +1,5 @@
 @setlocal DisableDelayedExpansion
+@set uivr=v11.3
 @echo off
 set "_cmdf=%~f0"
 if exist "%SystemRoot%\Sysnative\cmd.exe" (
@@ -28,13 +29,14 @@ if exist "%SystemRoot%\Sysnative\reg.exe" (
 set "SysPath=%SystemRoot%\Sysnative"
 set "Path=%SystemRoot%\Sysnative;%SystemRoot%;%SystemRoot%\Sysnative\Wbem;%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\;%Path%"
 )
+set "_psc=powershell -nop -c"
 set "_err===== ERROR ===="
 set winbuild=1
 for /f "tokens=6 delims=[]. " %%G in ('ver') do set winbuild=%%G
 if %winbuild% lss 7601 goto :E_Win
 set _cwmi=0
 for %%# in (wmic.exe) do @if not "%%~$PATH:#"=="" (
-wmic path Win32_ComputerSystem get CreationClassName /value 2>nul | find /i "ComputerSystem" 1>nul && set _cwmi=1
+cmd /c "wmic path Win32_ComputerSystem get CreationClassName /value" 2>nul | find /i "ComputerSystem" 1>nul && set _cwmi=1
 )
 set _pwsh=1
 for %%# in (powershell.exe) do @if "%%~$PATH:#"=="" set _pwsh=0
@@ -58,7 +60,7 @@ set "_temp=%temp%"
 set "_work=%~dp0"
 set "_work=%_work:~0,-1%"
 
-@title Office Click-to-Run Installer - Volume
+@title Office Click-to-Run Installer - Volume / %uivr%
 setlocal EnableDelayedExpansion
 set _updt=True
 set _eula=True
@@ -228,7 +230,7 @@ if /i "%_suite%"=="ProPlus2019Volume" set _pkey0=NMMKJ-6RK4F-KMJVX-8D9MJ-6MWKP
 if /i "%_suite%"=="Standard2019Volume" set _pkey0=6NWWJ-YQWMR-QKGCB-6TMB3-9D9HK
 if /i "%_suite%"=="ProPlus2021Volume" set _pkey0=FXYTK-NJJ8C-GB6DW-3DYQT-6F7TH
 if /i "%_suite%"=="Standard2021Volume" set _pkey0=KDX7X-BNVR8-TXXGX-4Q7Y8-78VT3
-if /i "%_suite%"=="ProPlus2024Volume" set _pkey0=NBBBB-BBBBB-BBBBB-BBBJD-VXRPM
+if /i "%_suite%"=="ProPlus2024Volume" set _pkey0=XJ2XN-FW8RK-P4HMP-DKDBV-GCVGB
 if /i "%_suite%"=="Standard2024Volume" set _pkey0=V28N4-JG22K-W66P8-VTMGK-H6HGR
 
 if defined _suit2 (
@@ -238,7 +240,7 @@ if /i "%_suit2%"=="ProPlus2019Volume" set _pkey0=NMMKJ-6RK4F-KMJVX-8D9MJ-6MWKP
 if /i "%_suit2%"=="Standard2019Volume" set _pkey0=6NWWJ-YQWMR-QKGCB-6TMB3-9D9HK
 if /i "%_suit2%"=="ProPlus2021Volume" set _pkey0=FXYTK-NJJ8C-GB6DW-3DYQT-6F7TH
 if /i "%_suit2%"=="Standard2021Volume" set _pkey0=KDX7X-BNVR8-TXXGX-4Q7Y8-78VT3
-if /i "%_suit2%"=="ProPlus2024Volume" set _pkey0=NBBBB-BBBBB-BBBBB-BBBJD-VXRPM
+if /i "%_suit2%"=="ProPlus2024Volume" set _pkey0=XJ2XN-FW8RK-P4HMP-DKDBV-GCVGB
 if /i "%_suit2%"=="Standard2024Volume" set _pkey0=V28N4-JG22K-W66P8-VTMGK-H6HGR
 )
 if defined _pkey0 set "_keys=%_pkey0%"
@@ -293,9 +295,9 @@ if /i "%%J"=="Outlook2024Volume" (set /a kk+=1&set _pkey!kk!=D2F8D-N3Q3B-J28PV-X
 if /i "%%J"=="PowerPoint2024Volume" (set /a kk+=1&set _pkey!kk!=CW94N-K6GJH-9CTXY-MG2VC-FYCWP)
 if /i "%%J"=="SkypeForBusiness2024Volume" (set /a kk+=1&set _pkey!kk!=4NKHF-9HBQF-Q3B6C-7YV34-F64P3)
 if /i "%%J"=="Word2024Volume" (set /a kk+=1&set _pkey!kk!=MQ84N-7VYDM-FXV7C-6K7CC-VFW9J)
-if /i "%%J"=="ProjectPro2024Volume" (set /a kk+=1&set _pkey!kk!=NBBBB-BBBBB-BBBBB-BBBH4-GX3R4)
+if /i "%%J"=="ProjectPro2024Volume" (set /a kk+=1&set _pkey!kk!=FQQ23-N4YCY-73HQ3-FM9WC-76HF4)
 if /i "%%J"=="ProjectStd2024Volume" (set /a kk+=1&set _pkey!kk!=PD3TT-NTHQQ-VC7CY-MFXK3-G87F8)
-if /i "%%J"=="VisioPro2024Volume" (set /a kk+=1&set _pkey!kk!=NBBBB-BBBBB-BBBBB-BBBCW-6MX6T)
+if /i "%%J"=="VisioPro2024Volume" (set /a kk+=1&set _pkey!kk!=B7TN8-FJ8V3-7QYCP-HQPMV-YY89G)
 if /i "%%J"=="VisioStd2024Volume" (set /a kk+=1&set _pkey!kk!=JMMVY-XFNQC-KK4HK-9H7R3-WQQTV)
 )
 
@@ -394,7 +396,7 @@ set "cfile=!_file:\=\\!"
 if exist "!_file!" if %_cwmi% equ 1 for /f "tokens=4 delims==." %%i in ('wmic datafile where "name='!cfile!'" get Version /value ^| find "="') do (
   if %%i geq %verchk% (set CTRexe=0)
 )
-if exist "!_file!" if %_cwmi% equ 0 for /f "tokens=3 delims==." %%i in ('powershell -nop -c "([WMI]'CIM_DataFile.Name=''!cfile!''').Version"') do (
+if exist "!_file!" if %_cwmi% equ 0 for /f "tokens=3 delims==." %%i in ('%_psc% "([WMI]'CIM_DataFile.Name=''!cfile!''').Version"') do (
   if %%i geq %verchk% (set CTRexe=0)
 )
 call :StopService 1>nul 2>nul

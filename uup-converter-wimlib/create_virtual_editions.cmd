@@ -1,7 +1,7 @@
 <!-- : 批处理脚本开始 
 @chcp 65001 >nul
 @setlocal DisableDelayedExpansion
-@set uivr=v124
+@set uivr=v124t
 @echo off
 :: ### 创建方法 ### 
 ::
@@ -1035,7 +1035,7 @@ if %EditionProf% equ 1 if %_build% geq 25982 set /a _sum+=1
 if %EditionLTSC% equ 1 if %_build% geq 25193 set /a _sum+=1
 wimlib-imagex.exe extract "%ISOdir%\Sources\boot.wim" 2 sources\setuphost.exe --dest-dir=.\bin\temp --no-acls --no-attributes %_Null%
 7z.exe l .\bin\temp\setuphost.exe >.\bin\temp\version.txt 2>&1
-for /f "tokens=4-7 delims=.() " %%i in ('"findstr /i /b "FileVersion" .\bin\temp\version.txt" %_Nul6%') do (set uupver=%%i.%%j&set uupmaj=%%i&set uupmin=%%j&set branch=%%k&set uupdate=%%l)
+for /f "tokens=4-7 delims=.() " %%i in ('"findstr /i /b "FileVersion" .\bin\temp\version.txt" %_Nul6%') do (set uupver=%%i.%%j&set uupmaj=%%i&set uupmin=%%j&set branch=%%k&set uupdate=%%l&set bkpdate=%%l)
 set revver=%uupver%&set revmaj=%uupmaj%&set revmin=%uupmin%
 set "tok=6,7"&set "toe=5,6,7"
 if /i %arch%==x86 (set _ss=x86) else if /i %arch%==x64 (set _ss=amd64) else (set _ss=arm64)
@@ -1058,6 +1058,15 @@ call :setuphostprep
 for /f "tokens=4-7 delims=.() " %%i in ('"findstr /i /b "FileVersion" .\bin\version.txt" %_Nul6%') do (set uupver=%%i.%%j&set uupmaj=%%i&set uupmin=%%j&set branch=%%k&set uupdate=%%l)
 del /f /q .\bin\version.txt %_Nul3%
 set "isotime=!uupdate:~2,2!/!uupdate:~4,2!/20!uupdate:~0,2!,!uupdate:~7,2!:!uupdate:~9,2!:10"
+set _pkgtime=0
+if /i "%branch%"=="WinBuild" set _pkgtime=1
+if /i "%branch%"=="GitEnlistment" set _pkgtime=1
+if /i "%uupdate%"=="winpbld" set _pkgtime=1
+if /i "%uupdate%"=="160101" set _pkgtime=1
+echo %uupdate% | findstr /i "BldB" %_Nul1% && set _pkgtime=1
+if %_pkgtime% equ 1 (
+call :get_lcu_pkg
+)
 if defined revbranch set branch=%revbranch%
 if %revmaj%==18363 (
 if /i "%branch:~0,4%"=="19h1" set branch=19h2%branch:~4%
@@ -1168,6 +1177,18 @@ echo.
 echo [VL]
 echo 1
 )>ISOFOLDER\Sources\EI.CFG
+exit /b
+
+:get_lcu_pkg
+if not exist "%SystemRoot%\temp\" mkdir "%SystemRoot%\temp" %_Nul3%
+wimlib-imagex.exe extract "%ISOdir%\sources\%WimFile%" 1 Windows\Servicing\Packages\Package_for_RollupFix*.mum --dest-dir=.\bin\temp --no-acls --no-attributes %_Nul3%
+if not exist "bin\temp\Package_for_RollupFix*.mum" (
+call set uupdate=%bkpdate%
+set "isotime=!uupdate:~2,2!/!uupdate:~4,2!/20!uupdate:~0,2!,!uupdate:~7,2!:!uupdate:~9,2!:10"
+exit /b
+)
+for /f %%# in ('dir /b /a:-d /od bin\temp\Package_for_RollupFix*.mum') do copy /y "bin\temp\%%#" %SystemRoot%\temp\update.mum %_Nul1%
+call :datemum uupdate isotime
 exit /b
 
 :datemum
