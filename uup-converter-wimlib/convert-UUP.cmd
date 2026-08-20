@@ -1,7 +1,7 @@
 <!-- : 批处理脚本开始 
 @chcp 65001 >nul
 @setlocal DisableDelayedExpansion
-@set uivr=v125f
+@set uivr=v125r
 @echo off
 :: 如需启用调试模式，请将参数设置为 1 
 set _Debug=0
@@ -390,9 +390,9 @@ set "MetadataESD=!_UUP!\%uups_esd1%"&set "_flg=%edition1%"&set "arch=%arch1%"&se
 goto :MAINMENU
 
 :MULTIMENU
-if %AutoStart% equ 1 (set AIO=1&set WIMFILE=install.wim&set wim2esd=0&goto :ISO)
+if %AutoStart% equ 1 (set AIO=1&set WIMFILE=install.wim&goto :ISO)
 if %AutoStart% equ 2 (set AIO=1&set WIMFILE=install.esd&goto :ISO)
-if %AutoStart% equ 3 (set AIO=1&set WIMFILE=install.wim&set wim2esd=0&goto :Single)
+if %AutoStart% equ 3 (set AIO=1&set WIMFILE=install.wim&goto :Single)
 if %AutoStart% equ 4 (set AIO=1&set WIMFILE=install.esd&goto :Single)
 @cls
 set _index=
@@ -445,9 +445,9 @@ if defined DrvSrcPE set DrvOpt=1
 goto :eof
 
 :MAINMENU
-if %AutoStart% equ 1 (set WIMFILE=install.wim&set wim2esd=0&goto :ISO)
+if %AutoStart% equ 1 (set WIMFILE=install.wim&goto :ISO)
 if %AutoStart% equ 2 (set WIMFILE=install.esd&goto :ISO)
-if %AutoStart% equ 3 (set WIMFILE=install.wim&set wim2esd=0&goto :Single)
+if %AutoStart% equ 3 (set WIMFILE=install.wim&goto :Single)
 if %AutoStart% equ 4 (set WIMFILE=install.esd&goto :Single)
 @cls
 set userinp=

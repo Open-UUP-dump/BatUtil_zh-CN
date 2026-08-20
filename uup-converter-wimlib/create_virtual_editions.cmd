@@ -1,7 +1,7 @@
 <!-- : 批处理脚本开始 
 @chcp 65001 >nul
 @setlocal DisableDelayedExpansion
-@set uivr=v124t
+@set uivr=v125
 @echo off
 :: ### 创建方法 ### 
 ::
