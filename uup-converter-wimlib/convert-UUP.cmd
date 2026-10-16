@@ -1,7 +1,7 @@
 <!-- : 批处理脚本开始 
 @chcp 65001 >nul
 @setlocal DisableDelayedExpansion
-@set uivr=v126
+@set uivr=v128
 @echo off
 :: 如需启用调试模式，请将参数设置为 1 
 set _Debug=0
@@ -583,10 +583,20 @@ if %_build% geq 26052 (set LCUwinre=0)
 )
 if %_build% lss 22621 set LCUmsuExpand=0
 if %_build% geq 26052 (
-if %LCUmsuExpand% equ 2 (set LCUmsuExpand=0) else if %LCUmsuExpand% equ 3 (set LCUmsuExpand=0) else (set LCUmsuExpand=1)
+if %LCUmsuExpand% equ 2 (set LCUmsuExpand=0) else if %LCUmsuExpand% equ 3 (set LCUmsuExpand=0) else if %LCUmsuExpand% equ 9 (set LCUmsuExpand=0) else (set LCUmsuExpand=1)
 if exist "!_UUP!\*Windows1*-KB5122055*.msu" (set LCUmsuExpand=0&set u_msulcu=3)
 )
+if %_build% geq 26052 if exist "!_UUP!\*Windows1*-KB*.msu" (
+if not exist "!_cabdir!\mum_x\" mkdir "!_cabdir!\mum_x"
+for /f "tokens=* delims=" %%# in ('dir /b /on "!_UUP!\*Windows1*-KB*.msu"') do (set "package=%%#"&call :scanmsu)
+if exist "!_cabdir!\mum_x\" rmdir /s /q "!_cabdir!\mum_x\" %_Nul1%
+)
+if %msumumx% equ 1 (
+if %LCUmsuExpand% equ 1 echo.&echo Turbo MumX v2 Container detected. LCUmsuExpand will be disabled.
+set LCUmsuExpand=0&set u_msulcu=3
+)
 if %_build% geq 26052 (
+if %u_msulcu% equ 2 if %ResetBase% equ 2 set ResetBase=1
 if %u_msulcu% equ 3 if %ResetBase% equ 2 set ResetBase=1
 )
 if %_build% geq 25380 (
@@ -827,7 +837,17 @@ if %_build% geq 26052 (
 if %LCUmsuExpand% equ 2 (set LCUmsuExpand=0) else if %LCUmsuExpand% equ 3 (set LCUmsuExpand=0) else (set LCUmsuExpand=1)
 if exist "!_UUP!\*Windows1*-KB5122055*.msu" (set LCUmsuExpand=0&set u_msulcu=3)
 )
+if %_build% geq 26052 if exist "!_UUP!\*Windows1*-KB*.msu" (
+if not exist "!_cabdir!\mum_x\" mkdir "!_cabdir!\mum_x"
+for /f "tokens=* delims=" %%# in ('dir /b /on "!_UUP!\*Windows1*-KB*.msu"') do (set "package=%%#"&call :scanmsu)
+if exist "!_cabdir!\mum_x\" rmdir /s /q "!_cabdir!\mum_x\" %_Nul1%
+)
+if %msumumx% equ 1 (
+if %LCUmsuExpand% equ 1 echo.&echo Turbo MumX v2 Container detected. LCUmsuExpand will be disabled.
+set LCUmsuExpand=0&set u_msulcu=3
+)
 if %_build% geq 26052 (
+if %u_msulcu% equ 2 if %ResetBase% equ 2 set ResetBase=1
 if %u_msulcu% equ 3 if %ResetBase% equ 2 set ResetBase=1
 )
 if %_build% geq 25380 (
@@ -1025,6 +1045,7 @@ set mounted=1
 if %_file%==%WIMFILE% (call :uups_update %WIMFILE% appx) else (call :uups_update install.iso appx)
 )
 if %AddUpdates% equ 1 if %_updexist% equ 1 (
+call :mumx_features
 set mounted=1
 if %_file%==%WIMFILE% (call :uups_update %WIMFILE%) else (call :uups_update install.iso)
 )
@@ -1659,7 +1680,7 @@ exit /b
 :uups_msu
 call :dk_color1 %Blue% "=== 创建累积更新 MSU 文件…… ===" 4 
 pushd "!_UUP!"
-set "_MSUdll=dpx.dll ReserveManager.dll TurboStack.dll UpdateAgent.dll UpdateCompression.dll wcp.dll"
+set "_MSUdll=dpx.dll ReserveManager.dll TurboContainer.dll TurboStack.dll UpdateAgent.dll UpdateCompression.dll wcp.dll"
 set "_MSUonf=onepackage.AggregatedMetadata.cab"
 set IncludeSSU=1
 set /a _rnd=%random%
@@ -1914,6 +1935,7 @@ exit /b
 (echo .Set SourceDir="%1"
 echo "dpx.dll"
 echo "ReserveManager.dll"
+echo "TurboContainer.dll"
 echo "TurboStack.dll"
 echo "UpdateAgent.dll"
 echo "wcp.dll"
@@ -2359,18 +2381,49 @@ if exist "%_cabdir%\du\replacementmanifests\" xcopy /CERY "%_cabdir%\du\replacem
 rmdir /s /q "%_cabdir%\du\" %_Nul3%
 exit /b
 
+:mumx_features
+if %msumumx% equ 1 if %winbuild% geq 19041 (
+pushd "!_cabdir!"
+if not exist "mumxFCon.txt" copy /y "!_work!\bin\mumxFCon.txt" . %_Nul3%
+%_Nul3% %_psc% "Set-Location -LiteralPath '!_cabdir!'; $f=[IO.File]::ReadAllText('.\mumxFCon.txt') -split ':fconf\:.*';iex ($f[1]);Clean"
+popd
+)
+goto :eof
+
+:scanmsu
+expand.exe -d -f:*Windows*.psf "!_UUP!\%package%" %_Nul2% | findstr /i %arch%\.psf %_Nul3% && goto :eof
+wimlib-imagex.exe dir "!_UUP!\%package%" %_Nul2% | findstr /i %arch%\.mumx %_Nul3% && (call :checkmsu)
+goto :eof
+
+:checkmsu
+if not defined msg_mumx call :dk_color1 %Blue% "=== Checking LCU MumX version . . ." 4 5
+set msg_mumx=1
+set loc_mumx=1
+if exist "!_cabdir!\mum_x\*.mumx*" del /f /q "!_cabdir!\mum_x\*.mumx*" %_Nul1%
+wimlib-imagex.exe extract "!_UUP!\%package%" 1 *Windows*.mumx* --dest-dir="!_cabdir!\mum_x" --nullglob %_Null%
+if exist "!_cabdir!\mum_x\*.mumx.???" for /f "tokens=* delims=" %%# in ('dir /b /on "!_cabdir!\mum_x\*.mumx.???"') do (
+if %_pwsh% equ 1 %_psc% "$bb = Get-Content '!_cabdir!\mum_x\%%#' -Encoding Byte -Total 216; if ('77 85 77 88' -eq $bb[208..211]) {$bb[215].ToString()} else {'1'}" | findstr 1 %_Nul1% || (set msumumx=1&set loc_mumx=2)
+if %_pwsh% equ 0 wimlib-imagex.exe info "!_cabdir!\mum_x\%%#" --header | findstr /i WIM_HDR_FLAG_COMPRESSION %_Nul1% || (set msumumx=1&set loc_mumx=2)
+)
+if exist "!_cabdir!\mum_x\*.mumx" for /f "tokens=* delims=" %%# in ('dir /b /on "!_cabdir!\mum_x\*.mumx"') do (
+if %_pwsh% equ 1 %_psc% "$bb = Get-Content '!_cabdir!\mum_x\%%#' -Encoding Byte -Total 8; $bb[7].ToString()" | findstr 1 %_Nul1% || (set msumumx=1&set loc_mumx=2)
+)
+echo %package% [MumX v%loc_mumx%]
+goto :eof
+
 :extract
 if not exist "!_cabdir!\" mkdir "!_cabdir!"
 if not exist "!_cabdir!\LCUmum\" mkdir "!_cabdir!\LCUmum"
+if not exist "!_cabdir!\LCUwpe\" mkdir "!_cabdir!\LCUwpe"
 if not exist "!_cabdir!\LCUall\" mkdir "!_cabdir!\LCUall"
 if not exist "!_cabdir!\LCUbase\" mkdir "!_cabdir!\LCUbase"
 if exist "!_UUP!\*Windows1*-KB*.msu" if %LCUmsuExpand% equ 1 if %_build% geq 22621 if %winbuild% geq 9600 (
-if exist "%SysPath%\UpdateCompression.dll" (set psfwim=1) else (if %_build% geq 26052 call :uups_dll UpdateCompression)
+if %_build% geq 26052 call :uups_dll UpdateCompression
 if %_build% lss 26052 set psfwim=1
 )
-if exist "!_cabdir!\UpdateCompression.dll" if %LCUmsuExpand% equ 1 (
-set "_delta=!_cabdir!\UpdateCompression.dll"
-set psfwim=1
+if exist "!_UUP!\*Windows1*-KB*.msu" if %LCUmsuExpand% equ 1 if %_build% geq 22621 (
+if exist "!_cabdir!\UpdateCompression.dll" (set psfwim=1&set "_delta=!_cabdir!\UpdateCompression.dll")
+if not exist "!_cabdir!\UpdateCompression.dll" (if exist "%SysPath%\UpdateCompression.dll" set psfwim=1)
 )
 if %psfnet% equ 0 set psfwim=0
 set _cab=0
@@ -2723,12 +2776,21 @@ if %_build% geq 22621 (
 if not exist "!_cabdir!\LCUmum\%kbnm%~%_Pkt%~%_ss%~~%cver%.mum" copy /y "%~1\update.mum" "!_cabdir!\LCUmum\%kbnm%~%_Pkt%~%_ss%~~%cver%.mum" %_Nul1%
 )
 call :vrpad %kbvr%
-if %_build% geq 26052 if %LCUmsuExpand% neq 1 (
+set copyLCU=0
+if %_build% geq 26052 (
+if %LCUmsuExpand% neq 1 set copyLCU=1
+)
+if %copyLCU% equ 1 (
 if not exist "!_cabdir!\LCUall\*Windows*%pkgid%*.msu" if not exist "!_cabdir!\LCUall\%cuvr%-%package%" (
   copy /y "!_UUP!\%package%" "!_cabdir!\LCUall\%cuvr%-%package%" %_Nul1%
-)
-if %u_msulcu% neq 3 if not exist "!_cabdir!\LCUbase\%cuvr%-%package%" echo %package% |findstr /i /r "KB5043080 KB5068181 KB5122055" %_Nul1% && (
+  )
+if %u_msulcu% equ 9 if not exist "!_cabdir!\LCUbase\%cuvr%-%package%" echo %package% |findstr /i /r "KB5043080 KB5068181 KB5122055" %_Nul1% && (
   copy /y "!_UUP!\%package%" "!_cabdir!\LCUbase\%cuvr%-%package%" %_Nul1%
+  )
+)
+if %_build% geq 26052 if %copyLCU% equ 0 (
+if not exist "!_cabdir!\LCUwpe\*Windows*%kb%*.msu" if not exist "!_cabdir!\LCUwpe\%cuvr%-%package%" (
+  copy /y "!_UUP!\%package%" "!_cabdir!\LCUwpe\%cuvr%-%package%" %_Nul1%
   )
 )
 if %kbvr% geq %c_ver% (
@@ -3358,6 +3420,10 @@ if exist "!dest!\*enablement-package*.mum" (
 set epkb=0
 for /f "tokens=3 delims== " %%# in ('findstr /i "Edition" "!dest!\update.mum" %_Nul6%') do if exist "%mumtarget%\Windows\Servicing\packages\%%~#*.mum" set epkb=1
 if exist "%mumtarget%\Windows\System32\wpeinit.exe" findstr /i /m "WinPE" "!dest!\update.mum" %_Nul3% && set epkb=1
+if "!epkb!"=="0" if %LTSC% equ 1 if %LtscAddEP% equ 2 (
+  for /f %%# in ('dir /b /a:-d "!dest!\*enablement-package~*.mum"') do set "ekbpack=!ekbpack! /PackagePath:!dest!\%%#"
+  goto :eof
+  )
 if "!epkb!"=="0" goto :eof
 if %LTSC% equ 1 if %LtscAddEP% neq 1 goto :eof
 set "ekbpack=!ekbpack! /PackagePath:!dest!\update.mum"
@@ -3397,6 +3463,11 @@ if %_build% geq 20231 if %_build% lss 26052 if %xmsu% equ 0 (
   set "lcupkg=%package%"
 )
 if exist "%mumtarget%\Windows\System32\wpeinit.exe" (
+if exist "!_cabdir!\LCUwpe\*.msu" if exist "%mumtarget%\Windows\Servicing\Packages\Package_for_RollupFix*.mum" (
+  if defined lcuwpe goto :eof
+  for /f "tokens=* delims=" %%# in ('dir /b /on "!_cabdir!\LCUwpe\*.msu"') do set "lcuwpe="!_cabdir!\LCUwpe\%%#""
+  goto :eof
+  )
 if %xmsu% equ 1 (
   goto :setlcu
   )
@@ -3416,12 +3487,13 @@ goto :eof
 if exist "!_cabdir!\LCUall\*.msu" (
 if defined lcuall goto :eof
 for /f "tokens=* delims=" %%# in ('dir /b /on "!_cabdir!\LCUall\*.msu"') do (
-  if %u_msulcu% equ 3 (set "lcumsu="!_cabdir!\LCUall\%%#"") else (set "lcumsu=!lcumsu! "!_cabdir!\LCUall\%%#"")
+  if %u_msulcu% neq 9 (set "lcumsu="!_cabdir!\LCUall\%%#"") else (set "lcumsu=!lcumsu! "!_cabdir!\LCUall\%%#"")
   )
 set lcuall=1
 ) else (
 set "lcumsu=!lcumsu! "!_UUP!\%package%""
 )
+if exist "%mumtarget%\Windows\System32\wpeinit.exe" goto :eof
 set "netmsu=!lcumsu!"
 goto :eof
 
@@ -4633,6 +4705,7 @@ set noLCU=0
 set mntRE=0
 set sduRE=0
 set cmtRE=0
+set msumumx=0
 set psfwim=0
 set _delta=msdelta.dll
 set _pspsfx=%_psc%
