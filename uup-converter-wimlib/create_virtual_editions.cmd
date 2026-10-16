@@ -915,9 +915,9 @@ if %SkipISO% neq 0 (
 call :dk_color1 %Blue% "=== 写入文件至 ISO 镜像…… ===" 4 
 if defined _exTime set isotime=%_exTime%
 if /i not %arch%==arm64 (
-cdimage.exe -bootdata:2#p0,e,b"ISOFOLDER\boot\etfsboot.com"#pEF,e,b"ISOFOLDER\efi\Microsoft\boot\efisys.bin" -o -m -u2 -udfver102 -t%isotime% -l%DVDLABEL% ISOFOLDER %DVDISO%.ISO
+cdimage.exe -bootdata:2#p0,e,b"ISOFOLDER\Boot\etfsboot.com"#pEF,e,b"ISOFOLDER\EFI\Microsoft\Boot\efisys.bin" -o -m -u2 -udfver102 -t%isotime% -l%DVDLABEL% ISOFOLDER %DVDISO%.ISO
 ) else (
-cdimage.exe -bootdata:1#pEF,e,b"ISOFOLDER\efi\Microsoft\boot\efisys.bin" -o -m -u2 -udfver102 -t%isotime% -l%DVDLABEL% ISOFOLDER %DVDISO%.ISO
+cdimage.exe -bootdata:1#pEF,e,b"ISOFOLDER\EFI\Microsoft\Boot\efisys.bin" -o -m -u2 -udfver102 -t%isotime% -l%DVDLABEL% ISOFOLDER %DVDISO%.ISO
 )
 set ERRTEMP=%ERRORLEVEL%
 if %ERRTEMP% neq 0 goto :E_ISO
@@ -1040,7 +1040,7 @@ set revver=%uupver%&set revmaj=%uupmaj%&set revmin=%uupmin%
 set "tok=6,7"&set "toe=5,6,7"
 if /i %arch%==x86 (set _ss=x86) else if /i %arch%==x64 (set _ss=amd64) else (set _ss=arm64)
 wimlib-imagex.exe extract "%ISOdir%\Sources\%WimFile%" 1 Windows\WinSxS\Manifests\%_ss%_microsoft-windows-coreos-revision*.manifest --dest-dir=.\bin\temp --no-acls --no-attributes %_Nul3%
-if exist "bin\temp\*_microsoft-windows-coreos-revision*.manifest" for /f "tokens=%tok% delims=_." %%A in ('dir /b /a:-d /od .\bin\temp\*_microsoft-windows-coreos-revision*.manifest') do set revver=%%A.%%B&set revmaj=%%A&set revmin=%%B
+if exist "bin\temp\*_microsoft-windows-coreos-revision*.manifest" for /f "tokens=%tok% delims=_." %%i in ('dir /b /a:-d /od .\bin\temp\*_microsoft-windows-coreos-revision*.manifest') do (set revver=%%i.%%j&set revmaj=%%i&set revmin=%%j)
 if %_build% geq 15063 (
 wimlib-imagex.exe extract "%ISOdir%\Sources\%WimFile%" 1 Windows\System32\config\SOFTWARE --dest-dir=.\bin\temp --no-acls --no-attributes %_Null%
 set "isokey=Microsoft\Windows NT\CurrentVersion\Update\TargetingInfo\Installed"
@@ -1098,13 +1098,18 @@ if %uupver:~0,5%==22621 set uupver=22631%uupver:~5%
 if %revmaj%==22635 (
 if %uupver:~0,5%==22621 set uupver=22635%uupver:~5%
 )
+if %revmaj%==26200 (
+if /i "%branch:~0,2%"=="ge" (echo %branch% | findstr /i /r "beta prerelease" %_Nul1% || set branch=25h2_ge%branch:~2%)
+if %uupver:~0,5%==26100 set uupver=26200%uupver:~5%
+)
+if %revmaj%==26300 (
+if /i "%branch:~0,2%"=="ge" (echo %branch% | findstr /i /r "beta prerelease" %_Nul1% || set branch=26h2_ge%branch:~2%)
+if %uupver:~0,5%==26100 set uupver=26300%uupver:~5%
+)
 if %uupmin% lss %revmin% (
 set uupver=%revver%
 set uupmin=%revmin%
-if not exist "%SystemRoot%\temp\" mkdir "%SystemRoot%\temp" %_Nul3%
-wimlib-imagex.exe extract "%ISOdir%\Sources\%WimFile%" 1 Windows\Servicing\Packages\Package_for_RollupFix*.mum --dest-dir=.\bin\temp --no-acls --no-attributes %_Nul3%
-for /f %%# in ('dir /b /a:-d /od bin\temp\Package_for_RollupFix*.mum') do copy /y "bin\temp\%%#" %SystemRoot%\temp\update.mum %_Nul1%
-call :datemum uupdate isotime
+call :get_lcu_pkg
 )
 if %uupmin% gtr %revmin% (
 if not exist "%SystemRoot%\temp\" mkdir "%SystemRoot%\temp" %_Nul3%
@@ -1181,7 +1186,7 @@ exit /b
 
 :get_lcu_pkg
 if not exist "%SystemRoot%\temp\" mkdir "%SystemRoot%\temp" %_Nul3%
-wimlib-imagex.exe extract "%ISOdir%\sources\%WimFile%" 1 Windows\Servicing\Packages\Package_for_RollupFix*.mum --dest-dir=.\bin\temp --no-acls --no-attributes %_Nul3%
+wimlib-imagex.exe extract "%ISOdir%\Sources\%WimFile%" 1 Windows\Servicing\Packages\Package_for_RollupFix*.mum --dest-dir=.\bin\temp --no-acls --no-attributes %_Nul3%
 if not exist "bin\temp\Package_for_RollupFix*.mum" (
 call set uupdate=%bkpdate%
 set "isotime=!uupdate:~2,2!/!uupdate:~4,2!/20!uupdate:~0,2!,!uupdate:~7,2!:!uupdate:~9,2!:10"
