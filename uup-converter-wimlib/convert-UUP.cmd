@@ -184,6 +184,12 @@ set _PSarg="""%~f0""" %_uac%
 if defined _args set _PSarg="""%~f0""" """%_args%""" %_uac%
 set _PSarg=%_PSarg:'=''%
 
+where sudo.exe >nul 2>nul
+if not errorlevel 1 (
+  %_Null% sudo.exe --inline cmd.exe /c ""%~f0" %* -elevated"
+  if not errorlevel 1 exit /b
+)
+
 (%_Null% cscript //NoLogo "%~f0?.wsf" //job:ELAV /File:"%~f0" %* %_uac%) && (
   exit /b
   ) || (
