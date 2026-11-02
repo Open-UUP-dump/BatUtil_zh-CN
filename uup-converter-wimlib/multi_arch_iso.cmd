@@ -1,6 +1,7 @@
 <!-- : Begin batch script
 @setlocal DisableDelayedExpansion
 @echo off
+@chcp 65001 >nul
 :: Change to 1 to enable debug mode
 set _Debug=0
 
@@ -50,7 +51,7 @@ if exist "%SystemRoot%\Sysnative\reg.exe" (
 set "SysPath=%SystemRoot%\Sysnative"
 set "Path=%xDS%;%SystemRoot%\Sysnative;%SystemRoot%;%SystemRoot%\Sysnative\Wbem;%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\;%Path%"
 )
-set "_err=echo: &echo ==== ERROR ===="
+set "_err=echo: &echo ==== 出错 ====" 
 set "_psc=powershell -nop -c"
 set winbuild=1
 for /f "tokens=6 delims=[]. " %%# in ('ver') do set winbuild=%%#
@@ -115,8 +116,8 @@ if %_Debug% equ 0 (
   set "_Nul6=2^>nul"
   set "_Nul3=1>nul 2>nul"
   set "_Pause=pause >nul"
-  set "_Contn=echo Press any key to continue..."
-  set "_Exit=echo Press any key to exit."
+  set "_Contn=echo 按任意键继续……" 
+  set "_Exit=echo 按任意键退出。" 
   set "_Supp="
   goto :Begin
 )
@@ -130,8 +131,8 @@ if %_Debug% equ 0 (
   set "_Supp=1>nul"
 copy /y nul "!_work!\#.rw" %_Null% && (if exist "!_work!\#.rw" del /f /q "!_work!\#.rw") || (set "_log=!_dsk!\%~n0")
 echo.
-echo Running in Debug Mode...
-echo The window will be closed when finished
+echo 正在调试模式下运行…… 
+echo 当完成之后，此窗口将会关闭 
 @echo on
 @prompt $G
 @call :Begin >"!_log!_tmp.log" 2>&1 &cmd /u /c type "!_log!_tmp.log">"!_log!_Debug.log"&del /f /q "!_log!_tmp.log"
@@ -140,7 +141,7 @@ echo The window will be closed when finished
 @exit /b
 
 :Begin
-title Multi-Architecture ISO
+title 多架构 ISO 
 pushd "!_work!"
 set _file=(7z.dll,7z.exe,bcdedit.exe,bfi.exe,cdimage.exe,libwim-15.dll,offlinereg.exe,offreg.dll,wimlib-imagex.exe)
 for %%# in %_file% do (
@@ -209,7 +210,7 @@ setlocal DisableDelayedExpansion
 set _erriso=0
 set _iso1=
 echo %line%
-echo Enter the full path to 1st ISO file
+echo 请输入第 1 个 ISO 文件的完整路径 
 echo %line%
 echo.
 set /p _iso1=
@@ -219,7 +220,7 @@ if not exist "%_iso1%" set _erriso=1
 if /i not "%_iso1:~-4%"==".iso" set _erriso=1
 if %_erriso% equ 1 (
 %_err%
-echo Specified path is not a valid ISO file
+echo 指定的路径不是有效的 ISO 文件 
 echo.
 %_Contn%&%_Pause%
 goto :prompt1
@@ -230,7 +231,7 @@ set _erriso=0
 set _iso2=
 echo.
 echo %line%
-echo Enter the full path to 2nd ISO file
+echo 请输入第 2 个 ISO 文件的完整路径 
 echo %line%
 echo.
 set /p _iso2=
@@ -240,7 +241,7 @@ if not exist "%_iso2%" set _erriso=1
 if /i not "%_iso2:~-4%"==".iso" set _erriso=1
 if %_erriso% equ 1 (
 %_err%
-echo Specified path is not a valid ISO file
+echo 指定的路径不是有效的 ISO 文件 
 echo.
 %_Contn%&%_Pause%
 @cls
@@ -269,19 +270,19 @@ if %AutoStart% equ 2 (if %_iso64% equ 1 (goto :dISO) else (goto :dCheck))
 @color 1F
 @cls
 echo %line%
-echo. Sources:
+echo. 源： 
 echo.
 if %_iso64% equ 1 (set Preserve=0&echo "!ISOfile1!"&echo "!ISOfile2!") else (echo "!ISOdir1!"&echo "!ISOdir2!")
 echo.
 echo %line%
-echo. Options:
+echo. 选项： 
 echo.
-echo. 0 - Exit
-echo. 1 - Create ISO with 1 combined install .wim/.esd
-echo. 2 - Create ISO with 2 separate install .wim/.esd/.swm ^(Win 11/10^)
+echo. 0 - 退出 
+echo. 1 - 创建包含合并 install.wim/install.esd 的 ISO 
+echo. 2 - 创建包含两个独立 install.wim/install.esd/install.swm 的 ISO ^(Win 11/10^) 
 echo %line%
 echo.
-choice /c 120 /n /m "Choose a menu option: "
+choice /c 120 /n /m "请选择菜单选项： " 
 if errorlevel 3 (set _Debug=1&goto :QUIT)
 if errorlevel 2 (if %_iso64% equ 1 (goto :dISO) else (goto :dCheck))
 if errorlevel 1 (set combine=1&set custom=1&if %_iso64% equ 1 (goto :dISO) else (goto :dCheck))
@@ -292,7 +293,7 @@ goto :DUALMENU
 call :checkQE
 echo.
 echo %line%
-echo Extracting ISO files . . .
+echo 正在提取 ISO 文件…… 
 echo %line%
 echo.
 set "ISOdir1=ISOx64"
@@ -312,7 +313,7 @@ call :checkQE
 )
 echo.
 echo %line%
-echo Checking distributions Info . . .
+echo 正在检查发行版信息…… 
 echo %line%
 for /L %%# in (1,1,2) do (
 set ISOmulti%%#=0
@@ -336,7 +337,7 @@ if /i "%WIMFILE1%" neq "%WIMFILE2%" (set "MESSAGE=ISO distributions have differe
 set WIMFILE=%WIMFILE1%
 echo.
 echo %line%
-echo Preparing ISO Info . . .
+echo 正在准备 ISO 信息…… 
 echo %line%
 call :dPREPARE 1
 call :dPREPARE 2
@@ -345,7 +346,7 @@ mkdir ISOFOLDER
 if %Preserve% equ 1 (
 echo.
 echo %line%
-echo Copying distributions folders . . .
+echo 正在复制发行版文件夹…… 
 echo %line%
 robocopy "!ISOdir1!" "ISOFOLDER\x64" /E /A-:R %_Nul3%
 robocopy "!ISOdir2!" "ISOFOLDER\x86" /E /A-:R %_Nul3%
@@ -364,7 +365,7 @@ set DVDISO=%_label%%DVDISO1%_%ISOarch1%FRE-%DVDISO2%_%ISOarch2%FRE_%langid%
 if %combine% equ 0 goto :BCD
 echo.
 echo %line%
-echo Unifying %WIMFILE% . . .
+echo 正在合并 %WIMFILE%…… 
 echo %line%
 echo.
 for /f "tokens=3 delims=: " %%# in ('wimlib-imagex.exe info ISOFOLDER\x86\sources\%WIMFILE% ^| findstr /c:"Image Count"') do set imagesi=%%#
@@ -391,7 +392,7 @@ wimlib-imagex.exe export ISOFOLDER\x64\sources\%WIMFILE% %%# ISOFOLDER\x86\sourc
 :BCD
 echo.
 echo %line%
-echo Preparing boot configuration settings . . .
+echo 正在准备启动配置…… 
 echo %line%
 echo.
 %_Nul3% xcopy ISOFOLDER\x64\boot\* ISOFOLDER\boot\ /cheriy
@@ -463,7 +464,7 @@ bcdedit /store %BCDUEFI% /enum all | findstr /i {memdiag} %_Nul1% || (
 if %custom% equ 0 goto :ISOCREATE
 echo.
 echo %line%
-echo Preparing Custom AIO settings . . .
+echo 正在准备自定义 AIO 设置…… 
 echo %line%
 echo.
 mkdir ISOFOLDER\sources
@@ -505,7 +506,7 @@ for /f "tokens=2 delims={}" %%# in ('bcdedit /store %BCDUEFI% /copy {memdiag} /d
 :ISOCREATE
 echo.
 echo %line%
-echo Creating ISO . . .
+echo 正在创建 ISO…… 
 echo %line%
 %_Nul3% robocopy mARCHiso ISOFOLDER /E /XF .README
 if exist "ISOFOLDER\efi\microsoft\boot\efisys.bin" (
@@ -753,37 +754,37 @@ exit /b
 
 :checkQE
 if not defined qerel reg.exe query HKCU\Console /v QuickEdit 2>nul | find /i "0x0" >nul || (
-echo ### WARNING ###
+echo ### 警告 ### 
 echo.
-echo Console "Quick Edit Mode" is active.
-echo Do not left-click with the mouse cursor inside the console window,
-echo or else the operation execution will hang until a key is pressed.
+echo 命令行“快速编辑模式”处于启用状态。 
+echo 请不要在当前窗口内单击鼠标左键， 
+echo 否则执行中的命令将会被暂停，直到按下键盘某个键为止。 
 echo.
 )
 exit /b
 
 :E_Admin
 %_err%
-echo This script require administrator privileges.
-echo To do so, right click on this script and select 'Run as administrator'
+echo 此脚本需要以管理员权限运行。 
+echo 如需继续执行，请在脚本上右键单击并选择“以管理员权限运行” 
 goto :E_Exit
 
 :E_PWS
 %_err%
-echo Windows PowerShell is not detected or not working correctly.
-echo It is required for this script to work.
+echo 未检测到 Windows PowerShell 或未正确响应。 
+echo 此脚本需要它才能工作。 
 goto :E_Exit
 
 :E_Exit
 if %_Debug% neq 0 exit /b
 echo.
-echo Press any key to exit.
+echo 按任意键退出。 
 pause >nul
 exit /b
 
 :E_Bin
 %_err%
-echo Required file %_bin% is missing.
+echo 所需的文件 %_bin% 丢失。 
 echo.
 goto :QUIT
 
@@ -804,7 +805,7 @@ popd
 @color 07
 if %_Debug% neq 0 exit /b
 if defined qmsg echo.&echo %qmsg%
-echo Press 0 or q to exit.
+echo 按下 0 或 q 以退出。 
 choice /c 0Q /n
 if errorlevel 1 (exit /b) else (rem.)
 

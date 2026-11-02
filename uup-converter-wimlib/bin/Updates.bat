@@ -1,5 +1,6 @@
 @echo off
-title Installing Updates . . .
+@chcp 65001 >nul
+title 正在安装更新 . . . 
 cd /d "%~dp0"
 if not exist "*Windows1*-KB*.msu" if not exist "*Windows1*-KB*.cab" if not exist "*SSU-*-*.cab" exit /b 0
 if exist "1SSU-*-*.cab" for /f "tokens=* delims=" %%# in ('dir /b /on "1SSU-*-*.cab"') do (

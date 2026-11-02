@@ -1,22 +1,23 @@
-# UUP -> ISO Converter
+﻿# UUP -> ISO 转换器
 
-* Automated windows command script to process Microsoft Windows 10 **Unified Update Platform** files, allowing to build/convert them into a usable state (ISO / WIM).
+* 用于处理 Microsoft Windows 10 **统一更新平台（Unified Update Platform）** 文件的自动化 Windows 命令脚本，可将这些文件构建/转换为可用状态（ISO / WIM）。
 
-- You can get UUP files by performing upgrade from Windows 10 build to later build (starting 15063).
+- 你可以通过将 Windows 10 从当前版本升级到更高版本（从 15063 开始）来获取 UUP 文件。
 
-* You can also obtain UUP canonical source using one of these projects:  
-[UUP dump website](https://uupdump.net/)  
+* 你也可以通过以下项目之一获取 UUP 原始文件：  
+[Open UUP dump 项目](https://github.com/Open-UUP-dump)  
 [UUP Generation Project](https://uup.rg-adguard.net/)
 
-- Refer to ReadMe.html for detailed usage and info.
+- 详细用法和信息请参阅 ReadMe.html。
 
-## Credits
+## 致谢
 
 * [whatever127](https://github.com/whatever127) - UUP dump
+* [abbodi1406](https://github.com/abbodi1406) - BatUtil & ReadMe
 * [Eric Biggers](http://wimlib.net) - wimlib
 * [Igor Pavlov](https://www.7-zip.org/) - 7-zip
 * [erwan.l](http://reboot.pro/files/file/313-offlinereg) - offlinereg
 * [cdob](http://reboot.pro/topic/20471-windows-pe-5x-boot-problem) - create aio efisys.bin
 * [@rgadguard](https://twitter.com/rgadguard) - initial script and co-enhancing
-* Special thanks to: @Enthousiast, @s1ave77, @Ratiborus58, @NecrosoftCore, @DiamondMonday, @WzorNET
-* cdimage, imagex and bcdedit are intellectual property of Microsoft Corporation.
+* 特别感谢：@Enthousiast、@s1ave77、@Ratiborus58、@NecrosoftCore、@DiamondMonday、@WzorNET
+* cdimage、imagex 和 bcdedit 是 Microsoft Corporation 的知识产权。

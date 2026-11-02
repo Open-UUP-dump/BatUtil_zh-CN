@@ -1,14 +1,14 @@
-### This file allows you to customize which Microsoft Store Apps are installed
-### during the UUP to ISO conversion process.
+### 此文件允许您在 UUP 转 ISO 的转换过程中，
+### 自定义安装哪些 Microsoft Store 应用。
 ###
-### For changes done to this file to be applied, the CustomList option in the
-### ConvertConfig.ini file needs to be set to 1.
+### 为了使对此文件所做的更改生效，
+### 需要将 ConvertConfig.ini 文件中的 CustomList 选项设置为 1。
 ### 
-### This customization is supported only in builds 22563 and later.
+### 此自定义功能仅在内部版本 22563 及更高版本中受支持。
 
-### Choose the wanted apps from below by removing # prefix
+### 请通过删除 # 前缀，从下方选择想要的应用
 
-### Common Apps / Client editions all
+### 通用应用 / 所有版本
 Microsoft.WindowsStore_8wekyb3d8bbwe
 Microsoft.StorePurchaseApp_8wekyb3d8bbwe
 Microsoft.SecHealthUI_8wekyb3d8bbwe
@@ -54,7 +54,7 @@ Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
 # Microsoft.WidgetsPlatformRuntime_8wekyb3d8bbwe
 # Microsoft.Copilot_8wekyb3d8bbwe
 
-### Media Apps / Client non-N editions
+### 媒体应用 / 非 N 版
 # Microsoft.ZuneMusic_8wekyb3d8bbwe
 # Microsoft.ZuneVideo_8wekyb3d8bbwe
 # Microsoft.YourPhone_8wekyb3d8bbwe
@@ -63,7 +63,7 @@ Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
 # Microsoft.XboxGamingOverlay_8wekyb3d8bbwe
 # Microsoft.Xbox.TCUI_8wekyb3d8bbwe
 
-### Media Codecs / Client non-N editions, Team edition
+### 媒体编解码器 / 非 N 版、团队版
 # Microsoft.WebMediaExtensions_8wekyb3d8bbwe
 # Microsoft.RawImageExtension_8wekyb3d8bbwe
 # Microsoft.HEIFImageExtension_8wekyb3d8bbwe
@@ -75,7 +75,7 @@ Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
 # Microsoft.MPEG2VideoExtension_8wekyb3d8bbwe
 # Microsoft.AV1VideoExtension_8wekyb3d8bbwe
 
-### Surface Hub Apps / Team edition
+### Surface Hub 应用 / 团队版
 # Microsoft.Whiteboard_8wekyb3d8bbwe
 # microsoft.microsoftskydrive_8wekyb3d8bbwe
 # Microsoft.MicrosoftTeamsforSurfaceHub_8wekyb3d8bbwe
