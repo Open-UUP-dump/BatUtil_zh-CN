@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 jobs:
-  normalize:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -15,33 +15,54 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch upstream commit key list
+      - name: Fetch upstream
         run: |
           git remote add upstream https://github.com/abbodi1406/BatUtil.git 2>/dev/null || git remote set-url upstream https://github.com/abbodi1406/BatUtil.git
           git fetch upstream master
-          git log --format='%s%x09%ad' --date=raw upstream/master > "$RUNNER_TEMP/upstream-keys"
 
-      - name: Sync upstream metadata
-        env:
-          UPSTREAM_KEYS: ${{ runner.temp }}/upstream-keys
+      - name: Apply missing upstream commits
         run: |
-          cat > "$RUNNER_TEMP/filter-author.sh" <<'SH'
-          #!/bin/sh
-          key=$(git log -1 --format='%s%x09%ad' --date=raw "$GIT_COMMIT")
-          if grep -Fqx "$key" "$UPSTREAM_KEYS"; then
-            export GIT_AUTHOR_NAME='Github Actions[bot]'
-            export GIT_AUTHOR_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
-            export GIT_COMMITTER_NAME='Github Actions[bot]'
-            export GIT_COMMITTER_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
-          fi
-          SH
-          chmod +x "$RUNNER_TEMP/filter-author.sh"
           git config user.name 'Github Actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --env-filter ". '$RUNNER_TEMP/filter-author.sh'" -- "${GITHUB_REF_NAME}"
-          git for-each-ref --format='%(refname)' refs/original | xargs -r -n1 git update-ref -d
-          git reflog expire --expire=now --all
-          git gc --prune=now
 
-      - name: Push rewritten history
-        run: git push origin "HEAD:${GITHUB_REF_NAME}" --force-with-lease
+          # The local history is a rewritten copy of upstream (translated and
+          # with translated commit messages). Identify upstream commits that
+          # are not present locally by matching subject + author date.
+          git log --format='%s%x09%ad' --date=raw HEAD > "$RUNNER_TEMP/local-keys"
+          missing=()
+          while IFS=$'\t' read -r sha subject date; do
+            key="${subject}"$'\t'"${date}"
+            if ! grep -Fqx -- "$key" "$RUNNER_TEMP/local-keys"; then
+              missing+=("$sha")
+            fi
+          done < <(git log --reverse --format='%H%x09%s%x09%ad' --date=raw upstream/master)
+
+          if [ "${#missing[@]}" -eq 0 ]; then
+            echo "No missing upstream commits."
+            exit 0
+          fi
+
+          for sha in "${missing[@]}"; do
+            echo "Applying upstream commit $sha"
+            if ! git cherry-pick --no-commit "$sha"; then
+              echo "::warning::Conflict while applying upstream commit $sha; keeping the upstream side."
+              if ! python3 .github/scripts/resolve-translation-conflicts.py; then
+                echo "::error::Could not resolve conflict for upstream commit $sha."
+                git status --short
+                exit 1
+              fi
+              git add -A
+              git commit -C "$sha" --author='Github Actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+            else
+              git commit -C "$sha" --author='Github Actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+            fi
+          done
+
+      - name: Push synced history
+        run: |
+          ahead=$(git rev-list --count "origin/${GITHUB_REF_NAME}..HEAD")
+          if [ "$ahead" -eq 0 ]; then
+            echo "Nothing to push."
+            exit 0
+          fi
+          git push origin "HEAD:${GITHUB_REF_NAME}"
