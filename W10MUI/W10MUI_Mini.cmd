@@ -152,7 +152,7 @@ if %winbuild% GEQ 10240 set "DismRoot=%SysPath%\dism.exe"
 
 :check
 if not exist "!DismRoot!" goto :E_BIN
-set _dism2="!DismRoot!" /English /ScratchDir
+set _dism2="!DismRoot!" /ScratchDir
 set "dsv=!dismroot:\=\\!"
 call :DismVer
 cd /d "!WORKDIR!"
@@ -346,8 +346,8 @@ goto :eof
 
 :contwork
 dism\imagex.exe /info "!WIMPATH!" | findstr /c:"LZMS" %_Nul1% && goto :E_ESD
-for /f "tokens=2 delims=: " %%i in ('dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" ^| findstr "Index"') do set imgcount=%%i
-for /f "tokens=4 delims=:. " %%i in ('dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "Version :"') do set _build=%%i
+for /f "tokens=2 delims=: " %%i in ('dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" ^| findstr "Index"') do set imgcount=%%i
+for /f "tokens=4 delims=:. " %%i in ('dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "Version :"') do set _build=%%i
 if %_build% equ 18363 set _build=18362
 for %%# in (19042 19043 19044 19045) do if %_build% equ %%# set _build=19041
 for %%# in (22622 22623 22624 22631 22635) do if %_build% equ %%# set _build=22621
@@ -367,7 +367,7 @@ echo Detect install.wim details
 echo ============================================================
 echo.
 for /L %%i in (1,1,%imgcount%) do (
-for /f "tokens=2 delims=: " %%# in ('dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:%%i ^| find /i "Architecture"') do set "WIMARCH%%i=%%#"
+for /f "tokens=2 delims=: " %%# in ('dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:%%i ^| find /i "Architecture"') do set "WIMARCH%%i=%%#"
 )
 for /L %%i in (1,1,%imgcount%) do (
 if /i !WIMARCH%%i!==x64 (call set WIMARCH%%i=amd64)
@@ -391,13 +391,13 @@ set _pex=0
 if %SLIM% NEQ 1 set _pex=1
 
 set _sss=Client
-dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:1 | findstr /i /c:"Installation : Server" %_Nul1% && set _sss=Server
-if "%_sss%"=="Server" dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:1 | findstr /i /c:"ServerAzureStackHCI" %_Nul1% && set _sss=ASZ
+dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:1 | findstr /i /c:"Installation : Server" %_Nul1% && set _sss=Server
+if "%_sss%"=="Server" dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:1 | findstr /i /c:"ServerAzureStackHCI" %_Nul1% && set _sss=ASZ
 if %RemoveInboxLP% NEQ 2 if %_build% EQU 26100 if "%_sss%"=="Server" for /L %%j in (1,1,%LANGUAGES%) do (
 call :chkSrvLP "!LANGUAGE%%j!"
 )
 if %RemoveInboxLP% NEQ 1 if "%DEFAULTLANGUAGE%"=="" (
-for /f "tokens=1" %%i in ('dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "Default"') do set "DEFAULTLANGUAGE=%%i"
+for /f "tokens=1" %%i in ('dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "Default"') do set "DEFAULTLANGUAGE=%%i"
 )
 
 if %WINPE% NEQ 1 goto :extract

@@ -156,7 +156,7 @@ for %%G in (7z.exe,7z.dll,cdimage.exe,imagex.exe) do (
 if not exist "bin\%%G" goto :E_BIN
 )
 if not exist "!DISMRoot!" goto :E_BIN
-set _dism2="!DISMRoot!" /English /ScratchDir
+set _dism2="!DISMRoot!" /ScratchDir
 
 if not "!DVDPATH!"=="" goto :prepare
 set _iso=0
@@ -249,14 +249,14 @@ if /i "%DVDPATH:~-4%"==".iso" (
    robocopy "!DVDPATH!" "!DVDDIR!" /E /A-:R /R:1 /W:1 /NFL /NDL /NP %_Nul1%
 )
 if not exist "!DVDDIR!\sources\install.wim" goto :E_WIM
-for /f "tokens=2 delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"!DVDDIR!\sources\install.wim" ^| findstr "Index"') do set imgcount=%%i
+for /f "tokens=2 delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"!DVDDIR!\sources\install.wim" ^| findstr "Index"') do set imgcount=%%i
 if %imgcount% gtr 1 if exist "!DVDDIR!\sources\ei.cfg" (
 del /f /q "!DVDDIR!\sources\ei.cfg" %_Nul1%
 )
 if "%DEFAULTLANGUAGE%"=="" (
-for /f "tokens=1" %%i in ('dism.exe /english /get-wiminfo /wimfile:"!DVDDIR!\sources\install.wim" /index:1 ^| find /i "Default"') do set "DEFAULTLANGUAGE=%%i"
+for /f "tokens=1" %%i in ('dism.exe /get-wiminfo /wimfile:"!DVDDIR!\sources\install.wim" /index:1 ^| find /i "Default"') do set "DEFAULTLANGUAGE=%%i"
 )
-for /f "tokens=2 delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"!DVDDIR!\sources\boot.wim" /index:1 ^| find /i "Architecture"') do set "BOOTARCH=%%i"
+for /f "tokens=2 delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"!DVDDIR!\sources\boot.wim" /index:1 ^| find /i "Architecture"') do set "BOOTARCH=%%i"
 if /i %BOOTARCH%==x64 set BOOTARCH=amd64
 echo.
 echo ============================================================
@@ -264,7 +264,7 @@ echo Detect install.wim details
 echo ============================================================
 echo.
 for /L %%i in (1,1,%imgcount%) do (
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"!DVDDIR!\sources\install.wim" /index:%%i ^| find /i "Architecture"') do set "WIMARCH%%i=%%#"
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"!DVDDIR!\sources\install.wim" /index:%%i ^| find /i "Architecture"') do set "WIMARCH%%i=%%#"
 )
 for /L %%i in (1,1,%imgcount%) do (
 if /i !WIMARCH%%i!==x64 (call set WIMARCH%%i=amd64)

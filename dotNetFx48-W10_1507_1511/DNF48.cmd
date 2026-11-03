@@ -192,7 +192,7 @@ pause
 goto :prompt
 )
 if exist "!target!\%pPKG%\*amd64*.mum" (set "xOS=x64"&set "pkg=20") else (set "xOS=x86"&set "pkg=19")
-set "_dism2=dism.exe /English /NoRestart /ScratchDir"
+set "_dism2=dism.exe /NoRestart /ScratchDir"
 if /i "!target!"=="%SystemDrive%" (set dismtarget=/Online) else (set dismtarget=/Image:"!target!")
 set "mountdir=!target!"
 

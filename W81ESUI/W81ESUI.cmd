@@ -225,13 +225,13 @@ echo ============================================================
 echo Please wait...
 echo ============================================================
 cd /d "!targetpath!"
-dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 6.3.960" %_Nul1% || (set "MESSAGE=Detected wim version is not Windows NT 6.3"&goto :E_Target)
-for /f "tokens=4 delims=:. " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Version :"') do set "verbuild=%%#"
-for /f "tokens=3 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 ^| findstr /i /c:"ServicePack Build"') do set "svcbuild=%%#"
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Architecture"') do set arch=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" ^| find /i "Index"') do set imgcount=%%#
+dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 6.3.960" %_Nul1% || (set "MESSAGE=Detected wim version is not Windows NT 6.3"&goto :E_Target)
+for /f "tokens=4 delims=:. " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Version :"') do set "verbuild=%%#"
+for /f "tokens=3 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 ^| findstr /i /c:"ServicePack Build"') do set "svcbuild=%%#"
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Architecture"') do set arch=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" ^| find /i "Index"') do set imgcount=%%#
 for /L %%# in (1,1,!imgcount!) do (
-  for /f "tokens=1* delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
+  for /f "tokens=1* delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
   )
 set "indices=*"
 set wimfiles=1
@@ -244,14 +244,14 @@ echo Please wait...
 echo ============================================================
 copy /y nul "!target!\#.rw" %_Nul3% && (del /f /q "!target!\#.rw" %_Nul3%) || (set copytarget=1)
 cd /d "!target!"
-dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 6.3.960" %_Nul1% || (set "MESSAGE=Detected install.wim version is not Windows NT 6.3"&goto :E_Target)
-for /f "tokens=4 delims=:. " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Version :"') do set "verbuild=%%#"
-for /f "tokens=3 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| findstr /i /c:"ServicePack Build"') do set "svcbuild=%%#"
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Architecture"') do set arch=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\boot.wim" ^| find /i "Index"') do set bootimg=%%#
+dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 6.3.960" %_Nul1% || (set "MESSAGE=Detected install.wim version is not Windows NT 6.3"&goto :E_Target)
+for /f "tokens=4 delims=:. " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Version :"') do set "verbuild=%%#"
+for /f "tokens=3 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| findstr /i /c:"ServicePack Build"') do set "svcbuild=%%#"
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Architecture"') do set arch=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\boot.wim" ^| find /i "Index"') do set bootimg=%%#
 for /L %%# in (1,1,!imgcount!) do (
-  for /f "tokens=1* delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
+  for /f "tokens=1* delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
   )
 set "indices=*"
 set "targetname=install.wim"
@@ -331,7 +331,7 @@ if %dvd%==0 goto :fin
 if "%indices%"=="*" set "indices="&for /L %%# in (1,1,!imgcount!) do set "indices=!indices! %%#"
 call :domount sources\install.wim
 if exist "!_work!\winre.wim" del /f /q "!_work!\winre.wim" %_Nul1%
-for /f "tokens=3 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"!target!\sources\boot.wim" /index:1 ^| findstr /i /c:"ServicePack Build"') do if %%# lss 20618 goto :fin
+for /f "tokens=3 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"!target!\sources\boot.wim" /index:1 ^| findstr /i /c:"ServicePack Build"') do if %%# lss 20618 goto :fin
 set imgcount=%bootimg%&set "indices="&for /L %%# in (1,1,!imgcount!) do set "indices=!indices! %%#"
 call :domount sources\boot.wim
 xcopy /CRY "!target!\efi\microsoft\boot\fonts" "!target!\boot\fonts\" %_Nul1%
@@ -922,7 +922,7 @@ if %wim%==1 if exist "!_wimpath!\setup.exe" (
 )
 if exist "!mountdir!\Windows\System32\Recovery\winre.wim" (
 attrib -S -H -I "!mountdir!\Windows\System32\Recovery\winre.wim" %_Nul3%
-if %%#==1 for /f "tokens=3 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"!mountdir!\Windows\System32\Recovery\winre.wim" /index:1 ^| findstr /i /c:"ServicePack Build"') do if %%# lss 20618 call set winre=0
+if %%#==1 for /f "tokens=3 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"!mountdir!\Windows\System32\Recovery\winre.wim" /index:1 ^| findstr /i /c:"ServicePack Build"') do if %%# lss 20618 call set winre=0
 )
 if %WinRE%==1 if exist "!mountdir!\Windows\System32\Recovery\winre.wim" if not exist "!_work!\winre.wim" call :winre
 if exist "!mountdir!\Windows\System32\Recovery\winre.wim" if exist "!_work!\winre.wim" (

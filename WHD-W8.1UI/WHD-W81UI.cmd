@@ -302,11 +302,11 @@ echo ============================================================
 echo Please wait...
 echo ============================================================
 cd /d "!targetpath!"
-dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 6.3.960" %_Nul1% || (set "MESSAGE=Detected wim version is not Windows 8.1"&goto :E_Target)
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Architecture"') do set arch=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" ^| find /i "Index"') do set imgcount=%%#
+dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 6.3.960" %_Nul1% || (set "MESSAGE=Detected wim version is not Windows 8.1"&goto :E_Target)
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Architecture"') do set arch=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" ^| find /i "Index"') do set imgcount=%%#
 for /L %%# in (1,1,!imgcount!) do (
-  for /f "tokens=1* delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
+  for /f "tokens=1* delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
   )
 set "indices=*"
 set wimfiles=1
@@ -319,12 +319,12 @@ echo Please wait...
 echo ============================================================
 copy /y nul "!target!\#.rw" %_Nul3% && (del /f /q "!target!\#.rw" %_Nul3%) || (set copytarget=1)
 cd /d "!target!"
-dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 6.3.960" %_Nul1% || (set "MESSAGE=Detected install.wim version is not Windows 8.1"&goto :E_Target)
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Architecture"') do set arch=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\boot.wim" ^| find /i "Index"') do set bootimg=%%#
+dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 6.3.960" %_Nul1% || (set "MESSAGE=Detected install.wim version is not Windows 8.1"&goto :E_Target)
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Architecture"') do set arch=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\boot.wim" ^| find /i "Index"') do set bootimg=%%#
 for /L %%# in (1,1,!imgcount!) do (
-  for /f "tokens=1* delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
+  for /f "tokens=1* delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
   )
 set "indices=*"
 set "targetname=install.wim"
@@ -469,7 +469,7 @@ echo ============================================================
 echo Converting install.wim to install.esd ...
 echo ============================================================
 cd /d "!target!"
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
 for /L %%# in (1,1,%imgcount%) do %_dism2%:"!cab_dir!" /Export-Image /SourceImageFile:sources\install.wim /SourceIndex:%%# /DestinationImageFile:sources\install.esd /Compress:Recovery
 if %errorlevel% neq 0 del /f /q sources\install.esd %_Nul3%
 if exist sources\install.esd del /f /q sources\install.wim
@@ -1325,7 +1325,7 @@ goto :eof
 
 :ei_cfg
 cd /d "!_wimpath!"
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%_wimfile%" ^| find /i "Index"') do set finalimages=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%_wimfile%" ^| find /i "Index"') do set finalimages=%%#
 if %finalimages% equ 1 if exist "sources\ei.cfg" exit /b
 if exist "sources\ei.cfg" del /f /q sources\ei.cfg
 (

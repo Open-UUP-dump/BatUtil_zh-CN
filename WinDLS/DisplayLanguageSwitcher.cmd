@@ -15,8 +15,8 @@ if /i %PROCESSOR_ARCHITECTURE%==x86 (
 if "%PROCESSOR_ARCHITEW6432%"=="" set "arch=32-bit"&set "cbsarch=x86"
 )
 for /f "skip=2 tokens=2*" %%i in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName') do set "product=%%j"
-for /f "tokens=3 delims=: " %%i in ('dism /English /Online /Get-CurrentEdition ^| find /i "Current Edition :"') do set "edition=%%i"
-for /f "tokens=5 delims=: " %%i in ('dism /English /Online /Get-Intl ^| findstr /I /C:"UI language :"') do set "uilang=%%i"
+for /f "tokens=3 delims=: " %%i in ('dism /Online /Get-CurrentEdition ^| find /i "Current Edition :"') do set "edition=%%i"
+for /f "tokens=5 delims=: " %%i in ('dism /Online /Get-Intl ^| findstr /I /C:"UI language :"') do set "uilang=%%i"
 for /f %%i in ('dir /b %windir%\servicing\Packages\Microsoft-Windows-Client-LanguagePack-Package~*.mum') do (call set /a _l+=1)
 if %_l% gtr 1 for /f "tokens=4 delims=~" %%i in ('dir /b %windir%\servicing\Packages\Microsoft-Windows-Client-LanguagePack-Package~*.mum') do (
 if defined uilangs (call set "uilangs=!uilangs! %%i") else (call set "uilangs=%%i")
@@ -86,11 +86,11 @@ if %build% equ 7601 if /i "%LangFile:~-3%" equ "exe" (
    LangPack\exe2cab.exe -q "%LangFile%" "LangPack\%build%_%cbsarch%.cab"
    set "LangFile=LangPack\%build%_%cbsarch%.cab"
 )
-for /f "tokens=9 delims=:~. " %%i in ('dism /English /Online /Get-PackageInfo /PackagePath:%LangFile% ^| findstr /I /C:"Package Identity"') do set "LangBuild=%%i"
+for /f "tokens=9 delims=:~. " %%i in ('dism /Online /Get-PackageInfo /PackagePath:%LangFile% ^| findstr /I /C:"Package Identity"') do set "LangBuild=%%i"
 if %build% neq %LangBuild% (set MESSAGE=ERROR: Lang Pack is not compatible with current OS version&goto :END)
-for /f "tokens=5 delims=:~ " %%i in ('dism /English /Online /Get-PackageInfo /PackagePath:%LangFile% ^| findstr /I /C:"Package Identity"') do set "LangArch=%%i"
+for /f "tokens=5 delims=:~ " %%i in ('dism /Online /Get-PackageInfo /PackagePath:%LangFile% ^| findstr /I /C:"Package Identity"') do set "LangArch=%%i"
 if /i %cbsarch% neq %LangArch% (set MESSAGE=ERROR: Lang Pack is not compatible with current OS architecture&goto :END)
-for /f "tokens=6 delims=:~ " %%i in ('dism /English /Online /Get-PackageInfo /PackagePath:%LangFile% ^| findstr /I /C:"Package Identity"') do set "LangCode=%%i"
+for /f "tokens=6 delims=:~ " %%i in ('dism /Online /Get-PackageInfo /PackagePath:%LangFile% ^| findstr /I /C:"Package Identity"') do set "LangCode=%%i"
 set "LangType=92"&set "Fallback="&set "Fallbac2="&call :%LangCode%
 
 :Info

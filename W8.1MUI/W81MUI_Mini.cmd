@@ -156,7 +156,7 @@ for /f %%# in ('dir /b /ad "!WINPEPATH!\x86\WinPE_OCs\*-*" %_Nul6%') do if exist
 )
 if not exist "!_7z!" goto :E_BIN
 if not exist "!DISMRoot!" goto :E_BIN
-set _dism2="!DISMRoot!" /English /ScratchDir
+set _dism2="!DISMRoot!" /ScratchDir
 
 if not "!WIMPATH!"=="" goto :prepare
 set _wim=0
@@ -234,13 +234,13 @@ if not exist "!WinpeOC%%j!\!LANGUAGE%%j!\lp.cab" call set WINPE=0
 )
 if not exist "!WORKDIR!\dotNetFx35_W8.1_x86_x64.exe" set NET35=0
 dism\imagex.exe /info "!WIMPATH!" | findstr /c:"LZMS" %_Nul1% && goto :E_ESD
-for /f "tokens=2 delims=: " %%i in ('dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" ^| findstr "Index"') do set imgcount=%%i
-for /f "tokens=3 delims=: " %%i in ('dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "ServicePack Build"') do set svcbuild=%%i
+for /f "tokens=2 delims=: " %%i in ('dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" ^| findstr "Index"') do set imgcount=%%i
+for /f "tokens=3 delims=: " %%i in ('dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "ServicePack Build"') do set svcbuild=%%i
 if %svcbuild% GEQ 17031 for /L %%j in (1,1,%LANGUAGES%) do (
 if /i not !LPLevel%%j!==S14 set ERRFILE=!LPFILE%%j!&goto :E_RTM
 )
 if "%DEFAULTLANGUAGE%"=="" (
-for /f "tokens=1" %%i in ('dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "Default"') do set "DEFAULTLANGUAGE=%%i"
+for /f "tokens=1" %%i in ('dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "Default"') do set "DEFAULTLANGUAGE=%%i"
 )
 echo.
 echo ============================================================
@@ -248,7 +248,7 @@ echo Detect install.wim details
 echo ============================================================
 echo.
 for /L %%i in (1,1,%imgcount%) do (
-for /f "tokens=2 delims=: " %%# in ('dism\dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:%%i ^| find /i "Architecture"') do set "WIMARCH%%i=%%#"
+for /f "tokens=2 delims=: " %%# in ('dism\dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:%%i ^| find /i "Architecture"') do set "WIMARCH%%i=%%#"
 )
 for /L %%i in (1,1,%imgcount%) do (
 if /i !WIMARCH%%i!==x64 (call set WIMARCH%%i=amd64)

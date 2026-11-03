@@ -358,11 +358,11 @@ cd /d "!_work!"
 )
 set _ADK=0
 set "showdism=Host OS"
-set "_dism2=%dismroot% /English /NoRestart /ScratchDir"
+set "_dism2=%dismroot% /NoRestart /ScratchDir"
 if /i not "!dismroot!"=="dism.exe" (
 set _ADK=1
 set "showdism=%dismroot%"
-set _dism2="%dismroot%" /English /NoRestart /ScratchDir
+set _dism2="%dismroot%" /NoRestart /ScratchDir
 set "dsv=!dismroot:\=\\!"
 call :DismVer
 ) else (
@@ -480,18 +480,18 @@ echo ============================================================
 echo Please wait...
 echo ============================================================
 cd /d "!targetpath!"
-dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 10." %_Nul1% || (
-dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 11." %_Nul1% || (set "MESSAGE=Detected wim version is not Windows NT 10.0"&goto :E_Target)
+dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 10." %_Nul1% || (
+dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 11." %_Nul1% || (set "MESSAGE=Detected wim version is not Windows NT 10.0"&goto :E_Target)
 )
-for /f "tokens=4 delims=:. " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Version :"') do set _build=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Architecture"') do set arch=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" ^| find /i "Index"') do set imgcount=%%#
+for /f "tokens=4 delims=:. " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Version :"') do set _build=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Architecture"') do set arch=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" ^| find /i "Index"') do set imgcount=%%#
 for /L %%# in (1,1,!imgcount!) do (
-  for /f "tokens=1* delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
+  for /f "tokens=1* delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
   )
 set "indices=*"
 set wimfiles=1
-dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i ": WindowsPE" %_Nul1% && set peTarget=1
+dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i ": WindowsPE" %_Nul1% && set peTarget=1
 cd /d "!_work!"
 )
 if %dvd%==1 (
@@ -501,15 +501,15 @@ echo Please wait...
 echo ============================================================
 copy /y nul "!target!\#.rw" %_Nul3% && (del /f /q "!target!\#.rw" %_Nul3%) || (set copytarget=1)
 cd /d "!target!"
-dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 10." %_Nul1% || (
-dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 11." %_Nul1% || (set "MESSAGE=Detected install.wim version is not Windows NT 10.0"&goto :E_Target)
+dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 10." %_Nul1% || (
+dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 11." %_Nul1% || (set "MESSAGE=Detected install.wim version is not Windows NT 10.0"&goto :E_Target)
 )
-for /f "tokens=4 delims=:. " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Version :"') do set _build=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Architecture"') do set arch=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\boot.wim" ^| find /i "Index"') do set bootimg=%%#
+for /f "tokens=4 delims=:. " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Version :"') do set _build=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Architecture"') do set arch=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\boot.wim" ^| find /i "Index"') do set bootimg=%%#
 for /L %%# in (1,1,!imgcount!) do (
-  for /f "tokens=1* delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
+  for /f "tokens=1* delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
   )
 set "targetname=install.wim"
 set "indices=*"
@@ -764,7 +764,7 @@ goto :eof
 )
 if %wim%==1 set "_w_=!target!"
 if %dvd%==1 set "_w_=!target!\sources\boot.wim"
-if %_wlib% equ 0 for /f %%# in ('dism.exe /English /List-Image /ImageFile:"!_w_!" /Index:1 ^| findstr /i "Package_for_RollupFix.*.mum"') do (
+if %_wlib% equ 0 for /f %%# in ('dism.exe /List-Image /ImageFile:"!_w_!" /Index:1 ^| findstr /i "Package_for_RollupFix.*.mum"') do (
 %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '!_w_!' '%%#' '%SystemRoot%\temp\%%~nx#'"
 )
 if %_wlib% equ 1 for /f %%# in ('^"!_wimlib! dir "!_w_!" 1 --path=Windows\Servicing ^| findstr /i "Package_for_RollupFix.*.mum"^"') do (
@@ -778,7 +778,7 @@ goto :eof
 :scanmsu
 expand.exe -d -f:*Windows*.psf "!repo!\!package!" %_Nul2% | findstr /i %arch%\.psf %_Nul3% && goto :eof
 if %_wlib% equ 1 !_wimlib! dir "!repo!\!package!" %_Nul2% | findstr /i %arch%\.mumx %_Nul3% && (call :checkmsu)
-if %_wlib% equ 0 dism.exe /English /List-Image /ImageFile:"!repo!\!package!" /Index:1 %_Nul2% | findstr /i %arch%\.mumx %_Nul3% && (call :checkmsu)
+if %_wlib% equ 0 dism.exe /List-Image /ImageFile:"!repo!\!package!" /Index:1 %_Nul2% | findstr /i %arch%\.mumx %_Nul3% && (call :checkmsu)
 goto :eof
 
 :checkmsu
@@ -793,7 +793,7 @@ set msg_mumx=1
 set loc_mumx=1
 if exist "!_cabdir!\mum_x\*.mumx*" del /f /q "!_cabdir!\mum_x\*.mumx*" %_Nul1%
 if %_wlib% equ 1 !_wimlib! extract "!repo!\!package!" 1 *Windows*.mumx* --dest-dir="!_cabdir!\mum_x" --nullglob %_Null%
-if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /English /List-Image /ImageFile:"!repo!\!package!" /Index:1 ^| findstr /i /r "%arch%\.mumx"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '!repo!\!package!' '%%#' '!_cabdir!\mum_x\%%#'"
+if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /List-Image /ImageFile:"!repo!\!package!" /Index:1 ^| findstr /i /r "%arch%\.mumx"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '!repo!\!package!' '%%#' '!_cabdir!\mum_x\%%#'"
 if exist "!_cabdir!\mum_x\*.mumx.???" for /f "tokens=* delims=" %%# in ('dir /b /on "!_cabdir!\mum_x\*.mumx.???"') do (
 if %_pwsh% equ 1 %_psc% "$bb = Get-Content '!_cabdir!\mum_x\%%#' -Encoding Byte -Total 216; if ('77 85 77 88' -eq $bb[208..211]) {$bb[215].ToString()} else {'1'}" | findstr 1 %_Nul1% || (set msumumx=1&set loc_mumx=2)
 if %_pwsh% equ 0 if %_wlib% equ 1 !_wimlib! info "!_cabdir!\mum_x\%%#" --header | findstr /i WIM_HDR_FLAG_COMPRESSION %_Nul1% || (set msumumx=1&set loc_mumx=2)
@@ -914,7 +914,7 @@ echo ============================================================
 echo Converting install.wim to install.esd ...
 echo ============================================================
 cd /d "!target!"
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
 if %_wlib% equ 1 (
 echo.
 !_wimlib! export sources\install.wim all sources\install.esd --compress=LZMS --solid
@@ -977,7 +977,7 @@ echo Modifying %_wimfile% image creation time ...
 echo ============================================================
 echo.
 if %keep%==1 (
-  for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%_wimfile%" ^| find /i "Index"') do set imgcount=%%#
+  for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%_wimfile%" ^| find /i "Index"') do set imgcount=%%#
   set "indices="&for /L %%# in (1,1,!imgcount!) do set "indices=!indices! %%#"
 )
 for %%# in (%indices%) do (
@@ -1094,7 +1094,7 @@ cd /d "!repo!"
 expand.exe -d -f:*Windows*.psf !package! %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set uupmsu=1&set msuwim=2)
 if %uupmsu% equ 0 if %_build% geq 21382 (
 if %_wlib% equ 1 !_wimlib! dir !package! %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set uupmsu=1&set msuwim=1)
-if %_wlib% equ 0 dism.exe /English /List-Image /ImageFile:!package! /Index:1 %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set uupmsu=1&set msuwim=1)
+if %_wlib% equ 0 dism.exe /List-Image /ImageFile:!package! /Index:1 %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set uupmsu=1&set msuwim=1)
 )
 set kbcab=
 if %uupmsu% equ 0 for /f "tokens=2 delims=: " %%# in ('expand.exe -d -f:*Windows*.cab !package! %_Nul6% ^| findstr /i %kb%') do set kbcab=%%#
@@ -1128,8 +1128,8 @@ if %_embd% equ 0 if exist "%dest%\" rmdir /s /q "%dest%\" %_Nul3%
 if not exist "%dest%\chck\" mkdir "%dest%\chck"
 if %msuwim% equ 1 if %_build% geq 26052 if %online%==0 (
 if %_wlib% equ 1 !_wimlib! extract "!repo!\!package!" 1 *.AggregatedMetadata*.cab --dest-dir="%dest%\chck" %_Nul3%
-if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /English /List-Image /ImageFile:"!repo!\!package!" /Index:1 ^| findstr /i /r ".*AggregatedMetadata\.cab"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '!repo!\!package!' '%%#' '%dest%\chck\%%#'"
-if not exist "%dest%\chck\*AggregatedMetadata.cab" dism.exe /English /Apply-Image /ImageFile:"!repo!\!package!" /Index:1 /ApplyDir:"%dest%\chck" /NoAcl:all %_Null%
+if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /List-Image /ImageFile:"!repo!\!package!" /Index:1 ^| findstr /i /r ".*AggregatedMetadata\.cab"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '!repo!\!package!' '%%#' '%dest%\chck\%%#'"
+if not exist "%dest%\chck\*AggregatedMetadata.cab" dism.exe /Apply-Image /ImageFile:"!repo!\!package!" /Index:1 /ApplyDir:"%dest%\chck" /NoAcl:all %_Null%
 for /f "tokens=* delims=" %%# in ('dir /b /on "%dest%\chck\*AggregatedMetadata.cab" %_Nul6%') do (%_exp% -f:HotpatchCompDB*.cab "%dest%\chck\%%#" "%dest%\chck" %_Null%)
 )
 if exist "%dest%\chck\HotpatchCompDB*.cab" (
@@ -1144,13 +1144,13 @@ if %msuwim% equ 2 (
 )
 if %msuwim% equ 1 if not exist "%dest%\chck\*.wim" (
 if %_wlib% equ 1 !_wimlib! extract "!repo!\!package!" 1 SSU-*%arch%*.cab RCU-*%arch%*.cab *Windows*.wim --dest-dir="%dest%\chck" --nullglob %_Null%
-if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /English /List-Image /ImageFile:"!repo!\!package!" /Index:1 ^| findstr /i /r "SSU-.* RCU-.* %arch%\.wim"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '!repo!\!package!' '%%#' '%dest%\chck\%%#'"
-if not exist "%dest%\chck\*.wim" dism.exe /English /Apply-Image /ImageFile:"!repo!\!package!" /Index:1 /ApplyDir:"%dest%\chck" /NoAcl:all %_Null%
+if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /List-Image /ImageFile:"!repo!\!package!" /Index:1 ^| findstr /i /r "SSU-.* RCU-.* %arch%\.wim"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '!repo!\!package!' '%%#' '%dest%\chck\%%#'"
+if not exist "%dest%\chck\*.wim" dism.exe /Apply-Image /ImageFile:"!repo!\!package!" /Index:1 /ApplyDir:"%dest%\chck" /NoAcl:all %_Null%
 )
 if %msuwim% equ 1 if %psfwim% equ 1 if not exist "%dest%\chck\*Windows*.psf" (
 if %_wlib% equ 1 !_wimlib! extract "!repo!\!package!" 1 *Windows*.psf --dest-dir="%dest%\chck" %_Null%
-if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /English /List-Image /ImageFile:"!repo!\!package!" /Index:1 ^| findstr /i /r "%arch%\.psf"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '!repo!\!package!' '%%#' '%dest%\chck\%%#'"
-if not exist "%dest%\chck\*.psf" dism.exe /English /Apply-Image /ImageFile:"!repo!\!package!" /Index:1 /ApplyDir:"%dest%\chck" /NoAcl:all %_Null%
+if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /List-Image /ImageFile:"!repo!\!package!" /Index:1 ^| findstr /i /r "%arch%\.psf"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '!repo!\!package!' '%%#' '%dest%\chck\%%#'"
+if not exist "%dest%\chck\*.psf" dism.exe /Apply-Image /ImageFile:"!repo!\!package!" /Index:1 /ApplyDir:"%dest%\chck" /NoAcl:all %_Null%
 )
 if exist "%dest%\chck\*Windows*.psf" (
 if %psfwim% equ 1 move /y "%dest%\chck\*Windows*.psf" "!_cabdir!\" %_Nul3%
@@ -1163,11 +1163,11 @@ if %msuwim% equ 2 (
 )
 if %msuwim% equ 1 (
 if %_wlib% equ 1 !_wimlib! extract "%dest%\chck\%compkg%" 1 update.mum %sss%_microsoft-updatetargeting-*os_*.manifest --dest-dir="%dest%" --nullglob %_Nul3%
-if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /English /List-Image /ImageFile:"%dest%\chck\%compkg%" /Index:1 ^| findstr /i /r "update.mum %sss%_microsoft-updatetargeting-.*os_"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '%dest%\chck\%compkg%' '%%#' '%dest%\%%#'"
+if %_wlib% equ 0 for /f "tokens=1 delims=\" %%# in ('dism.exe /List-Image /ImageFile:"%dest%\chck\%compkg%" /Index:1 ^| findstr /i /r "update.mum %sss%_microsoft-updatetargeting-.*os_"') do %_psc% "$f=[IO.File]::ReadAllText('!_batp!') -split ':wimmsu\:.*';iex ($f[1]);E '%dest%\chck\%compkg%' '%%#' '%dest%\%%#'"
 )
 if %msuwim% equ 1 if not exist "%dest%\update.mum" (
 mkdir %_drv%\_tWIM %_Nul3%
-dism.exe /English /Apply-Image /ImageFile:"%dest%\chck\%compkg%" /Index:1 /ApplyDir:"%_drv%\_tWIM" /NoAcl:all %_Null%
+dism.exe /Apply-Image /ImageFile:"%dest%\chck\%compkg%" /Index:1 /ApplyDir:"%_drv%\_tWIM" /NoAcl:all %_Null%
 copy /y "%_drv%\_tWIM\update.mum" "%dest%\" %_Nul3%
 copy /y "%_drv%\_tWIM\%sss%_microsoft-updatetargeting-*os_*.manifest" "%dest%\" %_Nul3%
 rmdir /s /q %_drv%\_tWIM\ %_Nul3%
@@ -1373,7 +1373,7 @@ set msu_%pkgm%=
 set psfx_%pkgn%=1
 set /a count+=1
 echo %count%/%_sum%: %package% [LCU]
-dism.exe /English /Apply-Image /ImageFile:"!_cabdir!\%package%" /Index:1 /ApplyDir:"%dest%" /NoAcl:all %_Null%
+dism.exe /Apply-Image /ImageFile:"!_cabdir!\%package%" /Index:1 /ApplyDir:"%dest%" /NoAcl:all %_Null%
 if not exist "%dest%\express.psf.cix.xml" for /f %%# in ('dir /b /a:-d "%dest%\*.psf.cix.xml"') do rename "%dest%\%%#" express.psf.cix.xml %_Nul3%
 set _sbst=0
 subst %_sdr% "!_cabdir!" %_Nul3% && set _sbst=1
@@ -3214,7 +3214,7 @@ set "uupmsu="
 if %_build% geq 22000 if exist "!repo!\*Windows1*-KB*%arch%*.msu" for /f "tokens=* delims=" %%# in ('dir /b /os "!repo!\*Windows1*-KB*%arch%*.msu"') do (
 expand.exe -d -f:*Windows*.psf "!repo!\%%#" %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set "uupmsu=%%#"&set msuwim=2)
 if %_wlib% equ 1 !_wimlib! dir "!repo!\%%#" %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set "uupmsu=%%#"&set msuwim=1)
-if %_wlib% equ 0 dism.exe /English /List-Image /ImageFile:"!repo!\%%#" /Index:1 %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set "uupmsu=%%#"&set msuwim=1)
+if %_wlib% equ 0 dism.exe /List-Image /ImageFile:"!repo!\%%#" /Index:1 %_Nul2% | findstr /i %arch%\.psf %_Nul3% && (set "uupmsu=%%#"&set msuwim=1)
 )
 
 if defined uupmsu if not exist "!_cabdir!\%_ddc%" (
@@ -3224,7 +3224,7 @@ if %msuwim% equ 1 if %_wlib% equ 0 %_psc% "$f=[IO.File]::ReadAllText('!_batp!') 
 )
 if %msuwim% equ 1 if not exist "!_cabdir!\%_ddc%" (
 mkdir %_drv%\_tWIM %_Nul3%
-dism.exe /English /Apply-Image /ImageFile:"!repo!\%uupmsu%" /Index:1 /ApplyDir:"%_drv%\_tWIM" /NoAcl:all %_Null%
+dism.exe /Apply-Image /ImageFile:"!repo!\%uupmsu%" /Index:1 /ApplyDir:"%_drv%\_tWIM" /NoAcl:all %_Null%
 copy /y "%_drv%\_tWIM\%_ddc%" "!_cabdir!\" %_Nul3%
 rmdir /s /q %_drv%\_tWIM\ %_Nul3%
 )
@@ -3422,7 +3422,7 @@ if %optSSU% equ 1 copy /y "%_MSUssu%" "_tWIM\%_MSUtsu%" %_Nul3%
 copy /y "%_MSUcab%" "_tWIM\%_MSUkbf%.wim" %_Nul3%
 copy /y "%_MSUpsf%" "_tWIM\%_MSUkbf%.psf" %_Nul3%
 if %_wlib% equ 1 !_wimlib! capture _tWIM\ %_MSUkbf%.msu content --compress=none --nocheck --no-acls %_Nul3%
-if %_wlib% equ 0 dism.exe /English /Capture-Image /ImageFile:%_MSUkbf%.msu /CaptureDir:_tWIM\ /Name:content /Compress:none /NoAcl:all %_Nul3%
+if %_wlib% equ 0 dism.exe /Capture-Image /ImageFile:%_MSUkbf%.msu /CaptureDir:_tWIM\ /Name:content /Compress:none /NoAcl:all %_Nul3%
 if %ERRORLEVEL% neq 0 (
 echo.
 echo wim capture %_MSUkbf%.msu failed
@@ -3515,7 +3515,7 @@ set aaa=%1
 if %wimfiles% equ 0 (
 for /f %%# in ('dir /b /ad "!mountdir!\Windows\Servicing\Version\1*"') do (for /f %%G in ('dir /b "!mountdir!\Windows\WinSxS\Manifests\%aaa%_microsoft-windows-servicingstack_%_Pkt%_%%#_*"') do set "src=%%~nG")
 ) else (
-dism.exe /English /List-Image /ImageFile:"!_file!" /Index:1 | find /i "%aaa%_microsoft-windows-servicingstack_" >_sxs.txt
+dism.exe /List-Image /ImageFile:"!_file!" /Index:1 | find /i "%aaa%_microsoft-windows-servicingstack_" >_sxs.txt
 for /f %%G in ('findstr /i Manifests _sxs.txt') do set "src=%%~nG"
 )
 mkdir "_tSSU\%src%" %_Nul3%
@@ -3684,7 +3684,7 @@ call :DismVer
 if %dsmver% lss 10240 (echo.&echo ERROR: DISM version is lower than 10.0.10240.16384&pause&goto :dismmenu)
 set "dismroot=%_pp%"
 set "showdism=%_pp%"
-set _dism2="%_pp%" /English /NoRestart /ScratchDir
+set _dism2="%_pp%" /NoRestart /ScratchDir
 set _ADK=1
 goto :mainmenu
 

@@ -74,8 +74,8 @@ goto :check2
 @cls
 if %_m% EQU 0 goto :TEMP
 for /f "tokens=3*" %%a in ('reg.exe query "%_key%" /s /v "Mount Path" 2^>nul ^| findstr /i /c:"Mount Path"') do (set "_mount=%%b"&call :CLN)
-dism.exe /English /Cleanup-Wim
-dism.exe /English /Cleanup-Mountpoints
+dism.exe /Cleanup-Wim
+dism.exe /Cleanup-Mountpoints
 if %_t% EQU 1 goto :TEMP
 goto :TheEnd
 
@@ -91,8 +91,8 @@ for /f %%A in ('dir /b /ad "%%#:\W10UItemp_*" 2^>nul') do (set "_mount=%%#:\%%A"
 goto :TheEnd
 
 :CLN
-dism.exe /English /Image:"%_mount%" /Get-Packages %_Null%
-dism.exe /English /Unmount-Wim /MountDir:"%_mount%" /Discard
+dism.exe /Image:"%_mount%" /Get-Packages %_Null%
+dism.exe /Unmount-Wim /MountDir:"%_mount%" /Discard
 :TMP
 if exist "%_mount%\" rmdir /s /q "%_mount%\" %_Null%
 if exist "%_mount%" (

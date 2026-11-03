@@ -151,7 +151,7 @@ echo.
 echo "%_source%"
 echo.
 "%~dp0dism\7z.exe" e "%_source%" -o"%TEMPDIR%" sources\install.wim >nul
-for /f "tokens=2 delims=: " %%i in ('dism\dism.exe /english /get-wiminfo /wimfile:"%TEMPDIR%\install.wim" /index:1 ^| find /i "Edition"') do set editionid=%%i
+for /f "tokens=2 delims=: " %%i in ('dism\dism.exe /get-wiminfo /wimfile:"%TEMPDIR%\install.wim" /index:1 ^| find /i "Edition"') do set editionid=%%i
 echo.
 echo ============================================================
 echo Mount install.wim

@@ -221,9 +221,9 @@ if /i !LPARCH%%j!==amd64 (echo !LANGUAGE%%j!: 64-bit {x64}) else (echo !LANGUAGE
 set "WinpeOC%%j=!EXTRACTDIR!\WINPE\!LPARCH%%j!\WINPE_FPS"
 )
 
-for /f "tokens=2 delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" ^| findstr "Index"') do set imgcount=%%i
+for /f "tokens=2 delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"!WIMPATH!" ^| findstr "Index"') do set imgcount=%%i
 if "%DEFAULTLANGUAGE%"=="" (
-for /f "tokens=1" %%i in ('dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "Default"') do set "DEFAULTLANGUAGE=%%i"
+for /f "tokens=1" %%i in ('dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:1 ^| find /i "Default"') do set "DEFAULTLANGUAGE=%%i"
 )
 echo.
 echo ============================================================
@@ -231,7 +231,7 @@ echo Detect install.wim details
 echo ============================================================
 echo.
 for /L %%i in (1,1,%imgcount%) do (
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"!WIMPATH!" /index:%%i ^| find /i "Architecture"') do set "WIMARCH%%i=%%#"
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"!WIMPATH!" /index:%%i ^| find /i "Architecture"') do set "WIMARCH%%i=%%#"
 )
 for /L %%i in (1,1,%imgcount%) do (
 if /i !WIMARCH%%i!==x64 (call set WIMARCH%%i=amd64)

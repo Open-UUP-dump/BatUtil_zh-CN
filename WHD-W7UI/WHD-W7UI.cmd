@@ -290,11 +290,11 @@ echo ============================================================
 echo Please wait...
 echo ============================================================
 cd /d "!targetpath!"
-dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 6.1.760" %_Nul1% || (set "MESSAGE=Detected wim version is not Windows 7 SP1"&goto :E_Target)
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Architecture"') do set arch=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" ^| find /i "Index"') do set imgcount=%%#
+dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 | find /i "Version : 6.1.760" %_Nul1% || (set "MESSAGE=Detected wim version is not Windows 7 SP1"&goto :E_Target)
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:1 ^| find /i "Architecture"') do set arch=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%targetname%" ^| find /i "Index"') do set imgcount=%%#
 for /L %%# in (1,1,!imgcount!) do (
-  for /f "tokens=1* delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"%targetname%" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
+  for /f "tokens=1* delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"%targetname%" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
   )
 set "indices=*"
 set wimfiles=1
@@ -307,12 +307,12 @@ echo Please wait...
 echo ============================================================
 copy /y nul "!target!\#.rw" %_Nul3% && (del /f /q "!target!\#.rw" %_Nul3%) || (set copytarget=1)
 cd /d "!target!"
-dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 6.1.760" %_Nul1% || (set "MESSAGE=Detected install.wim version is not Windows 7 SP1"&goto :E_Target)
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Architecture"') do set arch=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"sources\boot.wim" ^| find /i "Index"') do set bootimg=%%#
+dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 | find /i "Version : 6.1.760" %_Nul1% || (set "MESSAGE=Detected install.wim version is not Windows 7 SP1"&goto :E_Target)
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:1 ^| find /i "Architecture"') do set arch=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" ^| find /i "Index"') do set imgcount=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"sources\boot.wim" ^| find /i "Index"') do set bootimg=%%#
 for /L %%# in (1,1,!imgcount!) do (
-  for /f "tokens=1* delims=: " %%i in ('dism.exe /english /get-wiminfo /wimfile:"sources\install.wim" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
+  for /f "tokens=1* delims=: " %%i in ('dism.exe /get-wiminfo /wimfile:"sources\install.wim" /index:%%# ^| findstr /b /c:"Name"') do set name%%#="%%j"
   )
 set "indices=*"
 set "targetname=install.wim"
@@ -1683,7 +1683,7 @@ if exist "!target!\setup.exe" copy /y "!mountdir!\setup.exe" "!target!\" %_Nul3%
 goto :eof
 
 :winre
-dism.exe /english /get-wiminfo /wimfile:"!mountdir!\Windows\System32\Recovery\winre.wim" /index:1 | find /i "Version : 6.1.7601" %_Nul1% || (goto :eof)
+dism.exe /get-wiminfo /wimfile:"!mountdir!\Windows\System32\Recovery\winre.wim" /index:1 | find /i "Version : 6.1.7601" %_Nul1% || (goto :eof)
   echo.
   echo ============================================================
   echo Updating winre.wim
@@ -1741,7 +1741,7 @@ echo Rebuilding %_wimfile%
 echo ============================================================
 )
 cd /d "!_wimpath!"
-for /f "tokens=2 delims=: " %%# in ('dism.exe /english /get-wiminfo /wimfile:"%_wimfile%" ^| find /i "Index"') do set finalimages=%%#
+for /f "tokens=2 delims=: " %%# in ('dism.exe /get-wiminfo /wimfile:"%_wimfile%" ^| find /i "Index"') do set finalimages=%%#
 if %dvd%==1 if %finalimages% gtr 1 if exist "sources\ei.cfg" del /f /q sources\ei.cfg
 if %winbuild% geq 9600 (
 if %keep%==1 (

@@ -208,7 +208,7 @@ rem pause
 rem goto :prompt
 rem )
 if exist "!target!\Windows\servicing\Packages\*~amd64~~*.mum" (set "xOS=x64"&set "pkg=15 1 22") else (set "xOS=x86"&set "pkg=7 1 16")
-set "_dism2=dism.exe /English /NoRestart /ScratchDir"
+set "_dism2=dism.exe /NoRestart /ScratchDir"
 set dismtarget=/image:"!target!"
 set "mountdir=!target!"
 
