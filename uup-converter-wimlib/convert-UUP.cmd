@@ -1,7 +1,7 @@
 <!-- : 批处理脚本开始 
 @chcp 65001 >nul
 @setlocal DisableDelayedExpansion
-@set uivr=v128m
+@set uivr=v129
 @echo off
 :: 如需启用调试模式，请将参数设置为 1 
 set _Debug=0
@@ -44,8 +44,7 @@ set SkipISO=0
 :: 若不添加 winre.wim 到 install.wim/install.esd，请将此参数更改为 1 
 set SkipWinRE=0
 
-:: 若在无论是否检测到 SafeOS 更新的情况下，都强制使用累积更新来更新 winre.wim，请将此参数更改为 1 
-:: 在 Build 26052 及以上版本将会忽略并自动禁用 
+:: Change to 1 to force updating winre.wim with Cumulative Update regardless if SafeOS update detected
 set LCUwinre=0
 
 :: 展开累积更新并从松散文件通过 update.mum 安装，请将此参数更改为 1 
@@ -592,9 +591,8 @@ if %_build% lss 17763 if %AddUpdates% equ 2 (set AddUpdates=1)
 if %_build% lss 17763 if %AddUpdates% equ 1 if %W10UI% equ 0 (set AddUpdates=0)
 if %_build% geq 17763 if %AddUpdates% equ 1 if %W10UI% equ 0 (set AddUpdates=2)
 if %_build% lss 17763 if %AddUpdates% equ 1 (set Cleanup=1)
-if %_build% geq 22000 (
+if %_build% geq 22000 if %_build% lss 26052 (
 if %LCUwinre% equ 2 (set LCUwinre=0)
-if %_build% geq 26052 (set LCUwinre=0)
 )
 if %_build% lss 22621 set LCUmsuExpand=0
 if %_build% geq 26052 (
@@ -843,9 +841,8 @@ if %W10UI% equ 0 (set AddUpdates=0)
 if /i %arch%==arm64 if %winbuild% lss 9600 if %AddUpdates% equ 1 (set AddUpdates=0)
 if %Cleanup% equ 0 set ResetBase=0
 if %_build% lss 17763 if %AddUpdates% equ 1 (set Cleanup=1)
-if %_build% geq 22000 (
+if %_build% geq 22000 if %_build% lss 26052 (
 if %LCUwinre% equ 2 (set LCUwinre=0)
-if %_build% geq 26052 (set LCUwinre=0)
 )
 if %_build% lss 22621 set LCUmsuExpand=0
 if %_build% geq 26052 (
@@ -1052,7 +1049,7 @@ if exist "!_cabdir!\" rmdir /s /q "!_cabdir!\"
 del /f /q %_dLog%\* %_Nul3%
 if not exist "%_dLog%\" mkdir "%_dLog%" %_Nul3%
 if not exist "%SystemRoot%\temp\" mkdir "%SystemRoot%\temp" %_Nul3%
-del /f /q %SystemRoot%\temp\*.mum %_Nul3%
+del /f /q %SystemRoot%\temp\*.mum* %_Nul3%
 set mounted=0
 set _runDRV=0
 if %AddUpdates% neq 1 if %W10UI% neq 0 if %_runIPA% equ 1 (
@@ -1960,7 +1957,7 @@ exit /b
 (echo .Set SourceDir="%1"
 echo "dpx.dll"
 echo "ReserveManager.dll"
-echo "TurboContainer.dll"
+if exist "%1\TurboContainer.dll" echo "TurboContainer.dll"
 echo "TurboStack.dll"
 echo "UpdateAgent.dll"
 echo "wcp.dll"
@@ -3225,7 +3222,7 @@ set FullExit=exit
 goto :%_rtrn%
 
 :regBase
-if not exist "%mumtarget%\Windows\Servicing\Packages\Package_for_RollupFix*.mum" goto :eof
+if not exist "%mumtarget%\Windows\Servicing\Packages\Package_for_RollupFix*.mum" if not exist "%mumtarget%\Windows\Servicing\MumX\Package_for_RollupFix*.mumx*" goto :eof
 if exist "!_cabdir!\W10UI*.*" del /f /q "!_cabdir!\W10UI*.*" %_Nul3%
 call :hiveON
 set "_k_=HKEY_LOCAL_MACHINE\%SOFTWARE%\%_CBS%"
@@ -3395,12 +3392,12 @@ if not exist "!dest!\*enablement-package*.mum" set "edge=!edge! /PackagePath:!de
 goto :eof
 )
 if exist "!dest!\update.mum" findstr /i /m "Package_for_SafeOSDU" "!dest!\update.mum" %_Nul3% && (
-if not exist "%mumtarget%\Windows\Servicing\Packages\WinPE-Rejuv-Package~*.mum" goto :eof
+if not exist "%mumtarget%\Windows\WinSxS\Manifests\%xBT%_microsoft-windows-i..dsetup-rejuvenation_*.manifest" goto :eof
 set "safeos=!safeos! /PackagePath:!dest!\update.mum"
 goto :eof
 )
 if exist "!dest!\*_microsoft-windows-sysreset_*.manifest" findstr /i /m "Package_for_RollupFix" "!dest!\update.mum" %_Nul3% || (
-if not exist "%mumtarget%\Windows\Servicing\Packages\WinPE-SRT-Package~*.mum" goto :eof
+if not exist "%mumtarget%\Windows\WinSxS\Manifests\%xBT%_microsoft-windows-srt_*.manifest" goto :eof
 set "safeos=!safeos! /PackagePath:!dest!\update.mum"
 goto :eof
 )
@@ -3410,12 +3407,12 @@ set "safeos=!safeos! /PackagePath:!dest!\update.mum"
 goto :eof
 )
 if exist "!dest!\*_microsoft-windows-winre-tools_*.manifest" if not exist "!dest!\*_microsoft-windows-sysreset_*.manifest" if not exist "!dest!\*_microsoft-windows-winpe_tools_*.manifest" findstr /i /m "Package_for_RollupFix" "!dest!\update.mum" %_Nul3% || (
-if not exist "%mumtarget%\Windows\Servicing\Packages\WinPE-SRT-Package~*.mum" goto :eof
+if not exist "%mumtarget%\Windows\WinSxS\Manifests\%xBT%_microsoft-windows-srt_*.manifest" goto :eof
 set "safeos=!safeos! /PackagePath:!dest!\update.mum"
 goto :eof
 )
 if exist "!dest!\*_microsoft-windows-i..dsetup-rejuvenation_*.manifest" if not exist "!dest!\*_microsoft-windows-sysreset_*.manifest" if not exist "!dest!\*_microsoft-windows-winpe_tools_*.manifest" if not exist "!dest!\*_microsoft-windows-winre-tools_*.manifest" findstr /i /m "Package_for_RollupFix" "!dest!\update.mum" %_Nul3% || (
-if not exist "%mumtarget%\Windows\Servicing\Packages\WinPE-Rejuv-Package~*.mum" goto :eof
+if not exist "%mumtarget%\Windows\WinSxS\Manifests\%xBT%_microsoft-windows-i..dsetup-rejuvenation_*.manifest" goto :eof
 set "safeos=!safeos! /PackagePath:!dest!\update.mum"
 goto :eof
 )
@@ -3483,8 +3480,13 @@ if %_build% geq 20231 if %_build% lss 26052 if %xmsu% equ 0 (
   set "lcudir=!dest!"
   set "lcupkg=%package%"
 )
+set in_cu=0
 if exist "%mumtarget%\Windows\System32\wpeinit.exe" (
-if exist "!_cabdir!\LCUwpe\*.msu" if exist "%mumtarget%\Windows\Servicing\Packages\Package_for_RollupFix*.mum" (
+if exist "%mumtarget%\Windows\Servicing\Packages\Package_for_RollupFix*.mum" findstr /i Baseline "%mumtarget%\Windows\Servicing\Packages\Package_for_RollupFix*.mum" %_Nul1% || set in_cu=1
+if exist "%mumtarget%\Windows\Servicing\MumX\Package_for_RollupFix*.mumx*" set in_cu=1
+)
+if exist "%mumtarget%\Windows\System32\wpeinit.exe" (
+if %in_cu% equ 1 if exist "!_cabdir!\LCUwpe\*.msu" (
   if defined lcuwpe goto :eof
   for /f "tokens=* delims=" %%# in ('dir /b /on "!_cabdir!\LCUwpe\*.msu"') do set "lcuwpe="!_cabdir!\LCUwpe\%%#""
   goto :eof
@@ -4018,7 +4020,12 @@ xcopy /CIDRY "%_mount%\Windows\Boot\EFI\bootmgr.efi" "%_target%\" %_Nul3%
 xcopy /CIDRY "%_mount%\Windows\Boot\EFI\boot.stl" "%_target%\EFI\Microsoft\Boot\" %_Nul3%
 xcopy /CIDRY "%_mount%\Windows\Boot\EFI\boot.pnd.stl" "%_target%\EFI\Microsoft\Boot\" %_Nul3%
 :skiphand1
-if !handle2! equ 0 if not exist "%_mount%\Windows\System32\wpeinit.exe" if exist "%_mount%\Windows\Servicing\Packages\Package_for_RollupFix*.mum" (
+set doHandle2=0
+if !handle2! equ 0 if not exist "%_mount%\Windows\System32\wpeinit.exe" (
+if exist "%_mount%\Windows\Servicing\Packages\Package_for_RollupFix*.mum" set doHandle2=1
+if exist "%_mount%\Windows\Servicing\MumX\Package_for_RollupFix*.mumx*" set doHandle2=1
+)
+if %doHandle2% equ 1 (
 set handle2=1
 set isomin=0
 for /f "tokens=%tok% delims=_." %%i in ('dir /b /a:-d /od "%_mount%\Windows\WinSxS\Manifests\%_ss%_microsoft-windows-coreos-revision*.manifest"') do (set isover=%%i.%%j&set isomaj=%%i&set isomin=%%j)
