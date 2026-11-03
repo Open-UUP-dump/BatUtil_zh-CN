@@ -1,4 +1,5 @@
-<!-- : Begin batch script
+<!-- : 批处理脚本开始 
+@chcp 65001 >nul
 @setlocal DisableDelayedExpansion
 @set uivr=v68
 @echo off
@@ -1478,7 +1479,7 @@ echo Press 0 or q to exit.
 choice /c 0Q /n
 if errorlevel 1 (exit /b) else (rem.)
 
------ Begin wsf script --->
+----- wsf 脚本开始 ---> 
 <package>
    <job id="ELAV">
       <script language="VBScript">

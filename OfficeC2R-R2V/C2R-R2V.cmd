@@ -1,4 +1,5 @@
-<!-- : Begin batch script
+<!-- : 批处理脚本开始 
+@chcp 65001 >nul
 @setlocal DisableDelayedExpansion
 @set uivr=v17
 @echo off
@@ -1343,7 +1344,7 @@ if %_Debug% EQU 1 goto :eof
 pause >nul
 goto :eof
 
------ Begin wsf script --->
+----- wsf 脚本开始 ---> 
 <package>
    <job id="WmiQuery">
       <script language="VBScript">

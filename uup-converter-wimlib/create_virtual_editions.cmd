@@ -1357,8 +1357,8 @@ if not defined qerel reg.exe query HKCU\Console /v QuickEdit 2>nul | find /i "0x
 call :dk_color1 %Red% "### 警告 ###" 
 echo.
 echo 命令行“快速编辑模式”处于启用状态。 
-echo 请不要在当前窗口内单击鼠标左键，否则 
-echo 执行中的命令将会被暂停，直到按下键盘某个键为止。 
+echo 请不要在当前窗口内单击鼠标左键， 
+echo 否则执行中的命令将会被暂停，直到按下键盘某个键为止。 
 echo.
 set _preMount=4
 )
@@ -1367,13 +1367,13 @@ exit /b
 :E_Admin
 %_err%
 echo 此脚本需要以管理员权限运行。 
-echo 如需继续，请在脚本上右键单击并选择“以管理员权限运行” 
+echo 如需继续执行，请在脚本上右键单击并选择“以管理员权限运行” 
 goto :E_Exit
 
 :E_PWS
 %_err%
 echo 未检测到 Windows PowerShell 或未正确响应。 
-echo 此脚本需要它才能工作。 
+echo 此脚本需要它才能运行。 
 goto :E_Exit
 
 :E_Exit

@@ -1,4 +1,5 @@
-<!-- : Begin batch script
+<!-- : 批处理脚本开始 
+@chcp 65001 >nul
 @ECHO OFF
 SETLOCAL ENABLEDELAYEDEXPANSION
 mode con cols=180 lines=777
@@ -228,7 +229,7 @@ EXIT /b
            RD /s /q "!dirOfMSP!\!fileOfEXE!\"
 EXIT /b
 
------ Begin wsf script --->
+----- wsf 脚本开始 ---> 
 <package>
    <job id="ELAV">
        <script language="VBScript">

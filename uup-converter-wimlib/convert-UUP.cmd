@@ -44,7 +44,7 @@ set SkipISO=0
 :: 若不添加 winre.wim 到 install.wim/install.esd，请将此参数更改为 1 
 set SkipWinRE=0
 
-:: Change to 1 to force updating winre.wim with Cumulative Update regardless if SafeOS update detected
+:: 若在无论是否检测到 SafeOS 更新的情况下，都强制使用累积更新来更新 winre.wim，请将此参数更改为 1 
 set LCUwinre=0
 
 :: 展开累积更新并从松散文件通过 update.mum 安装，请将此参数更改为 1 
@@ -4883,8 +4883,8 @@ if not defined qerel reg.exe query HKCU\Console /v QuickEdit 2>nul | find /i "0x
 call :dk_color1 %Red% "### 警告 ###" 
 echo.
 echo 命令行“快速编辑模式”处于启用状态。 
-echo 请不要在当前窗口内单击鼠标左键，否则 
-echo 执行中的命令将会被暂停，直到按下键盘某个键为止。 
+echo 请不要在当前窗口内单击鼠标左键， 
+echo 否则执行中的命令将会被暂停，直到按下键盘某个键为止。 
 echo.
 )
 exit /b
@@ -4898,7 +4898,7 @@ goto :E_Exit
 :E_PWS
 %_err%
 echo 未检测到 Windows PowerShell 或未正确响应。 
-echo 此脚本需要它才能工作。 
+echo 此脚本需要它才能运行。 
 goto :E_Exit
 
 :E_Exit

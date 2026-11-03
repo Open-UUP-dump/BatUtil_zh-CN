@@ -1,4 +1,5 @@
-<!-- : Begin batch script
+<!-- : 批处理脚本开始 
+@chcp 65001 >nul
 @setlocal DisableDelayedExpansion
 @echo off
 @chcp 65001 >nul
@@ -772,7 +773,7 @@ goto :E_Exit
 :E_PWS
 %_err%
 echo 未检测到 Windows PowerShell 或未正确响应。 
-echo 此脚本需要它才能工作。 
+echo 此脚本需要它才能运行。 
 goto :E_Exit
 
 :E_Exit
@@ -809,7 +810,7 @@ echo 按下 0 或 q 以退出。
 choice /c 0Q /n
 if errorlevel 1 (exit /b) else (rem.)
 
------ Begin wsf script --->
+----- wsf 脚本开始 ---> 
 <package>
    <job id="ELAV">
       <script language="VBScript">
